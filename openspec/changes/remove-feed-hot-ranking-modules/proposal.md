@@ -9,7 +9,9 @@
 - **推荐模块**：删除 `BilibiliLive/Module/ViewController/FeedViewController.swift`
 - **热门模块**：删除 `BilibiliLive/Module/ViewController/HotViewController.swift`
 - **排行榜模块**：删除 `BilibiliLive/Module/ViewController/RankingViewController.swift`
-- **Feed 组件**：删除 `BilibiliLive/Component/Feed/` 目录及其所有文件
+
+**保留的共享组件**：
+- **Feed 组件**：`BilibiliLive/Component/Feed/` 目录保留，因为被关注、收藏等核心功能依赖
 
 保留以下核心功能：
 - 关注（FollowsViewController）
@@ -31,7 +33,7 @@
 - `BilibiliLive/Module/ViewController/FeedViewController.swift` - 将被删除
 - `BilibiliLive/Module/ViewController/HotViewController.swift` - 将被删除
 - `BilibiliLive/Module/ViewController/RankingViewController.swift` - 将被删除
-- `BilibiliLive/Component/Feed/` - 完整目录及其所有文件将被删除
+- `BilibiliLive/Component/Feed/` - **保留**，因为被关注、收藏、历史等功能使用
 - `openspec/specs/main-navigation/spec.md` - 需要更新以反映新的 3 标签页结构
 - `BilibiliLive/BLTabBarViewController.swift` - 已包含处理旧索引的兼容逻辑，不需要修改
 
