@@ -22,9 +22,9 @@
 
 ## 4. 更新 Xcode 项目文件
 
-- [ ] 4.1 在 Xcode 中打开项目，验证项目导航器中已删除的文件显示为红色（缺失）
-- [ ] 4.2 在 Xcode 中移除对已删除文件的引用（右键点击红色文件 → Delete → Remove Reference）
-- [ ] 4.3 清理 Xcode 构建缓存（Product → Clean Build Folder）
+- [x] 4.1 在 Xcode 中打开项目，验证项目导航器中已删除的文件显示为红色（缺失）
+- [x] 4.2 在 Xcode 中移除对已删除文件的引用（右键点击红色文件 → Delete → Remove Reference）
+- [x] 4.3 清理 Xcode 构建缓存（Product → Clean Build Folder）
 
 ## 5. 验证和测试
 
@@ -35,6 +35,6 @@
 
 ## 6. 归档规范
 
-- [ ] 6.1 运行 `openspec-cn archive --change remove-feed-hot-ranking-modules` 将增量规范归档到主规范
-- [ ] 6.2 验证 `openspec/specs/main-navigation/spec.md` 已更新为 3 标签页结构
-- [ ] 6.3 提交所有更改，包含描述性的 commit message
+- [x] 6.1 运行 `openspec-cn archive --change remove-feed-hot-ranking-modules` 将增量规范归档到主规范
+- [x] 6.2 验证 `openspec/specs/main-navigation/spec.md` 已更新为 3 标签页结构
+- [x] 6.3 提交所有更改，包含描述性的 commit message
