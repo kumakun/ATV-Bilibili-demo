@@ -27,18 +27,6 @@ class BLTabBarViewController: UITabBarController, UITabBarControllerDelegate {
     delegate = self
     var vcs = [UIViewController]()
 
-    let feedVC = FeedViewController()
-    feedVC.tabBarItem.title = "推荐"
-    vcs.append(feedVC)
-
-    let hotVC = HotViewController()
-    hotVC.tabBarItem.title = "热门"
-    vcs.append(hotVC)
-
-    let rank = RankingViewController()
-    rank.tabBarItem.title = "排行榜"
-    vcs.append(rank)
-
     let followVC = FollowsViewController()
     followVC.tabBarItem.title = "关注"
     vcs.append(followVC)
@@ -53,7 +41,20 @@ class BLTabBarViewController: UITabBarController, UITabBarControllerDelegate {
     vcs.append(persionVC)
 
     setViewControllers(vcs, animated: false)
-    selectedIndex = UserDefaults.standard.integer(forKey: selectedIndexKey)
+
+    // 处理旧的 selectedIndex 值，映射到新的 3-Tab 结构
+    var savedIndex = UserDefaults.standard.integer(forKey: selectedIndexKey)
+    if savedIndex >= 0 && savedIndex <= 2 {
+      // 旧的推荐(0)/热门(1)/排行榜(2) → 关注(0)
+      savedIndex = 0
+    } else if savedIndex >= 3 && savedIndex <= 5 {
+      // 旧的关注(3)/收藏(4)/我的(5) → 关注(0)/收藏(1)/我的(2)
+      savedIndex = savedIndex - 3
+    } else {
+      // 无效索引 → 关注(0)
+      savedIndex = 0
+    }
+    selectedIndex = savedIndex
   }
 
   override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
