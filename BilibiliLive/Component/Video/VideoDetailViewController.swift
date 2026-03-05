@@ -17,36 +17,56 @@ import UIKit
 
 class VideoDetailViewController: UIViewController {
     private var loadingView = UIActivityIndicatorView()
-    @IBOutlet var backgroundImageView: UIImageView!
-    @IBOutlet var effectContainerView: UIVisualEffectView!
+    private let backgroundImageView = UIImageView()
+    private let effectContainerView: UIVisualEffectView = {
+        let blurEffect = UIBlurEffect(style: .regular)
+        return UIVisualEffectView(effect: blurEffect)
+    }()
 
-    @IBOutlet var titleLabel: UILabel!
+    private let titleLabel = UILabel()
 
-    @IBOutlet var upButton: BLCustomTextButton!
-    @IBOutlet var followButton: BLCustomButton!
-    @IBOutlet var coverImageView: UIImageView!
-    @IBOutlet var playButton: BLCustomButton!
-    @IBOutlet var likeButton: BLCustomButton!
-    @IBOutlet var coinButton: BLCustomButton!
-    @IBOutlet var noteView: NoteDetailView!
-    @IBOutlet var dislikeButton: BLCustomButton!
+    private let upButton = BLCustomTextButton()
+    private let followButton = BLCustomButton()
+    private let coverImageView = UIImageView()
+    private let playButton = BLCustomButton()
+    private let likeButton = BLCustomButton()
+    private let coinButton = BLCustomButton()
+    private let noteView = NoteDetailView()
+    private let dislikeButton = BLCustomButton()
 
-    @IBOutlet var actionButtonSpaceView: UIView!
-    @IBOutlet var durationLabel: UILabel!
-    @IBOutlet var playCountLabel: UILabel!
-    @IBOutlet var danmakuLabel: UILabel!
-    @IBOutlet var uploadTimeLabel: UILabel!
-    @IBOutlet var bvidLabel: UILabel!
-    @IBOutlet var followersLabel: UILabel!
-    @IBOutlet var avatarImageView: UIImageView!
-    @IBOutlet var favButton: BLCustomButton!
-    @IBOutlet var pageCollectionView: UICollectionView!
-    @IBOutlet var ugcCollectionView: UICollectionView!
+    private let actionButtonSpaceView = UIView()
+    private let durationLabel = UILabel()
+    private let playCountLabel = UILabel()
+    private let danmakuLabel = UILabel()
+    private let uploadTimeLabel = UILabel()
+    private let bvidLabel = UILabel()
+    private let followersLabel = UILabel()
+    private let avatarImageView = UIImageView()
+    private let favButton = BLCustomButton()
+    private let pageCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = 10
+        layout.minimumInteritemSpacing = 10
+        layout.itemSize = CGSize(width: 350, height: 170)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        return UICollectionView(frame: .zero, collectionViewLayout: layout)
+    }()
 
-    @IBOutlet var pageView: UIView!
+    private let ugcCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = 10
+        layout.minimumInteritemSpacing = 10
+        layout.itemSize = CGSize(width: 361, height: 274)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 30)
+        return UICollectionView(frame: .zero, collectionViewLayout: layout)
+    }()
 
-    @IBOutlet var ugcLabel: UILabel!
-    @IBOutlet var ugcView: UIView!
+    private let pageView = UIView()
+
+    private let ugcLabel = UILabel()
+    private let ugcView = UIView()
     private var epid = 0
     private var seasonId = 0
     private var aid = 0
@@ -56,7 +76,7 @@ class VideoDetailViewController: UIViewController {
     private var playTimeInSecond: Int?
     private var subType: Int?
     private var data: VideoDetail?
-    @IBOutlet var scrollView: UIScrollView!
+    private let scrollView = UIScrollView()
     private var didSentCoins = 0 {
         didSet {
             if didSentCoins > 0 {
@@ -75,9 +95,7 @@ class VideoDetailViewController: UIViewController {
     private var subscriptions = [AnyCancellable]()
 
     static func create(aid: Int, cid: Int?, epid: Int? = nil) -> VideoDetailViewController {
-        let vc =
-            UIStoryboard(name: "Main", bundle: .main).instantiateViewController(
-                identifier: String(describing: self)) as! VideoDetailViewController
+        let vc = VideoDetailViewController()
         vc.aid = aid
         vc.cid = cid ?? 0
         vc.epid = epid ?? 0
@@ -85,34 +103,392 @@ class VideoDetailViewController: UIViewController {
     }
 
     static func create(epid: Int) -> VideoDetailViewController {
-        let vc =
-            UIStoryboard(name: "Main", bundle: .main).instantiateViewController(
-                identifier: String(describing: self)) as! VideoDetailViewController
+        let vc = VideoDetailViewController()
         vc.epid = epid
         return vc
     }
 
     static func create(seasonId: Int) -> VideoDetailViewController {
-        let vc =
-            UIStoryboard(name: "Main", bundle: .main).instantiateViewController(
-                identifier: String(describing: self)) as! VideoDetailViewController
+        let vc = VideoDetailViewController()
         vc.seasonId = seasonId
         return vc
     }
 
+    private func setupUI() {
+        // 配置背景图片
+        backgroundImageView.contentMode = .scaleAspectFit
+        backgroundImageView.clipsToBounds = true
+        view.addSubview(backgroundImageView)
+
+        // 配置模糊效果容器
+        view.addSubview(effectContainerView)
+
+        // ScrollView
+        scrollView.contentInsetAdjustmentBehavior = .never
+        scrollView.clipsToBounds = true
+        effectContainerView.contentView.addSubview(scrollView)
+
+        // 主内容 StackView
+        let mainStackView = UIStackView()
+        mainStackView.axis = .vertical
+        scrollView.addSubview(mainStackView)
+
+        // ===== 顶部容器（标题、UP主、封面等）=====
+        let topContainer = UIView()
+        mainStackView.addArrangedSubview(topContainer)
+
+        // 标题
+        titleLabel.font = .preferredFont(forTextStyle: .title2)
+        titleLabel.numberOfLines = 2
+        topContainer.addSubview(titleLabel)
+
+        // 封面图片
+        coverImageView.contentMode = .scaleToFill
+        coverImageView.clipsToBounds = true
+        topContainer.addSubview(coverImageView)
+
+        // UP主信息 StackView
+        let upStackView = UIStackView()
+        upStackView.axis = .horizontal
+        upStackView.distribution = .equalSpacing
+        upStackView.alignment = .center
+        upStackView.spacing = 30
+        topContainer.addSubview(upStackView)
+
+        // UP主头像
+        avatarImageView.contentMode = .scaleAspectFit
+        avatarImageView.clipsToBounds = true
+        upStackView.addArrangedSubview(avatarImageView)
+
+        // UP主按钮
+        upButton.tintColor = UIColor(named: "bgColor")
+        upButton.title = "up"
+        upButton.addTarget(self, action: #selector(actionShowUpSpace), for: .primaryActionTriggered)
+        upButton.setContentCompressionResistancePriority(.required, for: .vertical)
+        upStackView.addArrangedSubview(upButton)
+
+        // 关注按钮
+        followButton.tintColor = UIColor(named: "bgColor")
+        followButton.image = UIImage(systemName: "heart")
+        followButton.onImage = UIImage(systemName: "heart.fill")
+        followButton.addTarget(self, action: #selector(actionFollow), for: .primaryActionTriggered)
+        upStackView.addArrangedSubview(followButton)
+
+        // 粉丝数标签
+        followersLabel.text = "100万粉丝"
+        followersLabel.font = UIFont(name: "HelveticaNeue", size: 28)
+        upStackView.addArrangedSubview(followersLabel)
+
+        // 时长信息
+        let timeView = UIView()
+        upStackView.addArrangedSubview(timeView)
+
+        let clockIcon = UIImageView(image: UIImage(systemName: "clock.fill"))
+        clockIcon.tintColor = UIColor(named: "titleColor")
+        timeView.addSubview(clockIcon)
+
+        durationLabel.text = "1分1s"
+        durationLabel.font = .systemFont(ofSize: 28)
+        timeView.addSubview(durationLabel)
+
+        // 统计信息 StackView
+        let statsStackView = UIStackView()
+        statsStackView.axis = .horizontal
+        statsStackView.spacing = 30
+        topContainer.addSubview(statsStackView)
+
+        // 播放量
+        let playCountView = UIView()
+        statsStackView.addArrangedSubview(playCountView)
+
+        let playIcon = UIImageView(image: UIImage(systemName: "play.square"))
+        playIcon.tintColor = UIColor(named: "titleColor")
+        playCountView.addSubview(playIcon)
+
+        playCountLabel.text = "1"
+        playCountLabel.font = .systemFont(ofSize: 28)
+        playCountView.addSubview(playCountLabel)
+
+        // 弹幕数
+        let danmakuView = UIView()
+        statsStackView.addArrangedSubview(danmakuView)
+
+        let danmakuIcon = UIImageView(image: UIImage(systemName: "list.bullet.rectangle"))
+        danmakuIcon.tintColor = UIColor(named: "titleColor")
+        danmakuView.addSubview(danmakuIcon)
+
+        danmakuLabel.text = "100"
+        danmakuLabel.font = .systemFont(ofSize: 28)
+        danmakuView.addSubview(danmakuLabel)
+
+        // 上传时间
+        uploadTimeLabel.text = "2021-11-11"
+        uploadTimeLabel.font = UIFont(name: "HelveticaNeue", size: 28)
+        statsStackView.addArrangedSubview(uploadTimeLabel)
+
+        // BVID
+        bvidLabel.text = "BVxxxxxx"
+        bvidLabel.font = UIFont(name: "HelveticaNeue", size: 28)
+        statsStackView.addArrangedSubview(bvidLabel)
+
+        // 笔记视图
+        noteView.backgroundColor = .clear
+        topContainer.addSubview(noteView)
+
+        // ===== 操作按钮栏 =====
+        let actionStackView = UIStackView()
+        actionStackView.axis = .horizontal
+        actionStackView.spacing = 20
+        mainStackView.addArrangedSubview(actionStackView)
+
+        let leftSpacing = UIView()
+        actionStackView.addArrangedSubview(leftSpacing)
+
+        // 播放按钮
+        playButton.tintColor = UIColor(named: "bgColor")
+        playButton.image = UIImage(systemName: "play")
+        playButton.highLightImage = UIImage(systemName: "play.fill")
+        playButton.title = "播放"
+        playButton.titleColor = UIColor(named: "titleColor") ?? .white
+        playButton.addTarget(self, action: #selector(actionPlay), for: .primaryActionTriggered)
+        actionStackView.addArrangedSubview(playButton)
+
+        // 点赞按钮
+        likeButton.tintColor = UIColor(named: "bgColor")
+        likeButton.image = UIImage(systemName: "hand.thumbsup")
+        likeButton.onImage = UIImage(systemName: "hand.thumbsup.fill")
+        likeButton.title = "点赞"
+        likeButton.titleColor = UIColor(named: "titleColor") ?? .white
+        likeButton.addTarget(self, action: #selector(actionLike), for: .primaryActionTriggered)
+        actionStackView.addArrangedSubview(likeButton)
+
+        // 投币按钮
+        coinButton.tintColor = UIColor(named: "bgColor")
+        coinButton.image = UIImage(systemName: "bitcoinsign.circle")
+        coinButton.onImage = UIImage(systemName: "bitcoinsign.circle.fill")
+        coinButton.title = "投币"
+        coinButton.titleColor = UIColor(named: "titleColor") ?? .white
+        coinButton.addTarget(self, action: #selector(actionCoin), for: .primaryActionTriggered)
+        actionStackView.addArrangedSubview(coinButton)
+
+        // 收藏按钮
+        favButton.tintColor = UIColor(named: "bgColor")
+        favButton.image = UIImage(systemName: "star")
+        favButton.onImage = UIImage(systemName: "star.fill")
+        favButton.title = "收藏"
+        favButton.titleColor = UIColor(named: "titleColor") ?? .white
+        favButton.addTarget(self, action: #selector(actionFavorite), for: .primaryActionTriggered)
+        actionStackView.addArrangedSubview(favButton)
+
+        // 不喜欢按钮
+        dislikeButton.tintColor = UIColor(named: "bgColor")
+        dislikeButton.image = UIImage(systemName: "hand.thumbsdown")
+        dislikeButton.onImage = UIImage(systemName: "hand.thumbsdown.fill")
+        dislikeButton.title = "不喜欢"
+        dislikeButton.titleColor = UIColor(named: "titleColor") ?? .white
+        dislikeButton.addTarget(self, action: #selector(actionDislike), for: .primaryActionTriggered)
+        actionStackView.addArrangedSubview(dislikeButton)
+
+        actionStackView.addArrangedSubview(actionButtonSpaceView)
+
+        // 间隔
+        let spaceView = UIView()
+        mainStackView.addArrangedSubview(spaceView)
+
+        // ===== 视频选集区域 =====
+        pageView.backgroundColor = .clear
+        mainStackView.addArrangedSubview(pageView)
+
+        let pageTitle = UILabel()
+        pageTitle.text = "视频选集"
+        pageTitle.font = .preferredFont(forTextStyle: .title3)
+        pageView.addSubview(pageTitle)
+
+        pageCollectionView.backgroundColor = .clear
+        pageCollectionView.dataSource = self
+        pageCollectionView.delegate = self
+        pageView.addSubview(pageCollectionView)
+
+        // ===== 合集区域 =====
+        ugcView.backgroundColor = .clear
+        mainStackView.addArrangedSubview(ugcView)
+
+        ugcLabel.text = "合集"
+        ugcLabel.font = .preferredFont(forTextStyle: .title3)
+        ugcView.addSubview(ugcLabel)
+
+        ugcCollectionView.backgroundColor = .clear
+        ugcCollectionView.dataSource = self
+        ugcCollectionView.delegate = self
+        ugcView.addSubview(ugcCollectionView)
+
+        // ===== 布局约束 =====
+        backgroundImageView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+
+        effectContainerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+
+        mainStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalTo(scrollView)
+        }
+
+        // 顶部容器约束
+        titleLabel.snp.makeConstraints { make in
+            make.leading.equalTo(topContainer.safeAreaLayoutGuide).offset(80)
+            make.trailing.equalTo(topContainer.safeAreaLayoutGuide).offset(-80)
+            make.top.equalTo(topContainer.safeAreaLayoutGuide).offset(60)
+        }
+
+        coverImageView.snp.makeConstraints { make in
+            make.trailing.equalTo(topContainer.safeAreaLayoutGuide).offset(-80)
+            make.top.equalTo(titleLabel.snp.bottom).offset(20)
+            make.bottom.equalToSuperview().offset(-20)
+            make.width.equalTo(coverImageView.snp.height).multipliedBy(16.0 / 9.0)
+            make.height.equalTo(350)
+        }
+
+        upStackView.snp.makeConstraints { make in
+            make.leading.equalTo(topContainer.safeAreaLayoutGuide).offset(80)
+            make.top.equalTo(titleLabel.snp.bottom).offset(20)
+            make.height.equalTo(60)
+        }
+
+        avatarImageView.snp.makeConstraints { make in
+            make.width.height.equalTo(50)
+        }
+
+        followButton.snp.makeConstraints { make in
+            make.width.equalTo(61.5)
+            make.height.equalTo(54)
+        }
+
+        clockIcon.snp.makeConstraints { make in
+            make.leading.centerY.equalToSuperview()
+            make.width.height.equalTo(34)
+        }
+
+        durationLabel.snp.makeConstraints { make in
+            make.leading.equalTo(clockIcon.snp.trailing).offset(10)
+            make.trailing.top.bottom.equalToSuperview()
+            make.centerY.equalToSuperview()
+        }
+
+        statsStackView.snp.makeConstraints { make in
+            make.leading.equalTo(topContainer.safeAreaLayoutGuide).offset(80)
+            make.top.equalTo(upStackView.snp.bottom).offset(24)
+        }
+
+        playIcon.snp.makeConstraints { make in
+            make.leading.centerY.equalToSuperview()
+            make.width.height.equalTo(34)
+        }
+
+        playCountLabel.snp.makeConstraints { make in
+            make.leading.equalTo(playIcon.snp.trailing).offset(10)
+            make.trailing.top.bottom.equalToSuperview()
+            make.centerY.equalToSuperview()
+        }
+
+        danmakuIcon.snp.makeConstraints { make in
+            make.leading.centerY.equalToSuperview()
+            make.width.equalTo(56)
+            make.height.equalTo(34)
+        }
+
+        danmakuLabel.snp.makeConstraints { make in
+            make.leading.equalTo(danmakuIcon.snp.trailing).offset(10)
+            make.trailing.top.bottom.equalToSuperview()
+            make.centerY.equalToSuperview()
+        }
+
+        noteView.snp.makeConstraints { make in
+            make.leading.equalTo(topContainer.safeAreaLayoutGuide).offset(80)
+            make.top.equalTo(statsStackView.snp.bottom).offset(10)
+            make.bottom.equalTo(topContainer.safeAreaLayoutGuide).offset(-40)
+            make.trailing.lessThanOrEqualTo(coverImageView.snp.leading).offset(-20)
+        }
+
+        // 操作按钮栏约束
+        actionStackView.snp.makeConstraints { make in
+            make.height.equalTo(128)
+        }
+
+        leftSpacing.snp.makeConstraints { make in
+            make.width.equalTo(60)
+        }
+
+        playButton.snp.makeConstraints { make in
+            make.width.equalTo(160)
+        }
+
+        likeButton.snp.makeConstraints { make in
+            make.width.equalTo(playButton)
+        }
+
+        coinButton.snp.makeConstraints { make in
+            make.width.equalTo(playButton)
+        }
+
+        favButton.snp.makeConstraints { make in
+            make.width.equalTo(playButton)
+        }
+
+        dislikeButton.snp.makeConstraints { make in
+            make.width.equalTo(playButton)
+        }
+
+        // 间隔视图
+        spaceView.snp.makeConstraints { make in
+            make.height.equalTo(20)
+        }
+
+        // 视频选集区域
+        pageTitle.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(88)
+            make.top.equalToSuperview().offset(40)
+        }
+
+        pageCollectionView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+            make.top.equalTo(pageTitle.snp.bottom).offset(30)
+            make.bottom.equalToSuperview().offset(-20)
+            make.height.equalTo(90)
+        }
+
+        // 合集区域
+        ugcLabel.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(88)
+            make.top.equalToSuperview().offset(20)
+        }
+
+        ugcCollectionView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+            make.top.equalTo(ugcLabel.snp.bottom)
+            make.bottom.equalToSuperview()
+            make.height.equalTo(320)
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
         Task { await fetchData() }
 
         pageCollectionView.register(
             BLTextOnlyCollectionViewCell.self,
             forCellWithReuseIdentifier: String(describing: BLTextOnlyCollectionViewCell.self)
         )
-        pageCollectionView.collectionViewLayout = makePageCollectionViewLayout()
         ugcCollectionView.register(
             RelatedVideoCell.self, forCellWithReuseIdentifier: String(describing: RelatedVideoCell.self)
         )
-        ugcCollectionView.collectionViewLayout = makeRelatedVideoCollectionViewLayout()
         noteView.onPrimaryAction = {
             [weak self] note in
             let detail = ContentDetailViewController.createDesp(content: note.label.text ?? "")
@@ -447,20 +823,20 @@ class VideoDetailViewController: UIViewController {
         }
     }
 
-    @IBAction func actionShowUpSpace(_ sender: Any) {
+    @objc private func actionShowUpSpace() {
         let upSpaceVC = UpSpaceViewController()
         upSpaceVC.mid = data?.View.owner.mid
         present(upSpaceVC, animated: true)
     }
 
-    @IBAction func actionFollow(_ sender: Any) {
+    @objc private func actionFollow() {
         followButton.isOn.toggle()
         if let mid = data?.View.owner.mid {
             WebRequest.follow(mid: mid, follow: followButton.isOn)
         }
     }
 
-    @IBAction func actionPlay(_ sender: Any) {
+    @objc private func actionPlay() {
         let player = VideoPlayerViewController(
             playInfo: PlayInfo(
                 aid: aid, cid: cid, epid: epid, seasonId: seasonId, subType: subType,
@@ -490,7 +866,7 @@ class VideoDetailViewController: UIViewController {
         present(player, animated: true, completion: nil)
     }
 
-    @IBAction func actionLike(_ sender: Any) {
+    @objc private func actionLike() {
         Task {
             if likeButton.isOn {
                 likeButton.title? -= 1
@@ -505,7 +881,7 @@ class VideoDetailViewController: UIViewController {
         }
     }
 
-    @IBAction func actionCoin(_ sender: Any) {
+    @objc private func actionCoin() {
         guard didSentCoins < 2 else { return }
         let alert = UIAlertController(title: "投币个数", message: nil, preferredStyle: .actionSheet)
         WebRequest.requestTodayCoins { todayCoins in
@@ -541,7 +917,7 @@ class VideoDetailViewController: UIViewController {
         present(alert, animated: true)
     }
 
-    @IBAction func actionFavorite(_ sender: Any) {
+    @objc private func actionFavorite() {
         Task {
             guard let favList = try? await WebRequest.requestFavVideosList() else {
                 return
@@ -567,7 +943,7 @@ class VideoDetailViewController: UIViewController {
         }
     }
 
-    @IBAction func actionDislike(_ sender: Any) {
+    @objc private func actionDislike() {
         dislikeButton.isOn.toggle()
         ApiRequest.requestDislike(aid: aid, dislike: dislikeButton.isOn)
     }
