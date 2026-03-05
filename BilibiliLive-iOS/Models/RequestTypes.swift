@@ -43,4 +43,9 @@ class CookieHandler {
       cookieStorage.deleteCookie(cookie)
     }
   }
+
+  func csrf() -> String? {
+    let cookies = cookieStorage.cookies(for: URL(string: "https://bilibili.com")!)
+    return cookies?.first(where: { $0.name == "bili_jct" })?.value
+  }
 }

@@ -153,4 +153,51 @@ enum ApiRequest {
       }
     }
   }
+
+  // MARK: - Profile APIs
+
+  static func getUserProfile(mid: Int) async throws -> UserProfile {
+    try await WebRequest.requestUserInfo(mid: mid)
+  }
+
+  static func requestFollowingUps(page: Int = 1) async throws -> [FollowingUser] {
+    try await WebRequest.requestFollowingUps(page: page)
+  }
+
+  static func requestHistory() async throws -> [HistoryItem] {
+    try await WebRequest.requestHistory()
+  }
+
+  static func requestToView() async throws -> [WatchLaterItem] {
+    try await WebRequest.requestWatchLater()
+  }
+
+  static func requestFollowBangumi(type: Int, page: Int = 1) async throws -> [BangumiItem] {
+    try await WebRequest.requestFollowBangumi(type: type, page: page)
+  }
+
+  static func requestWeeklyWatchList() async throws -> [WeeklyList] {
+    try await WebRequest.requestWeeklyWatchList()
+  }
+
+  static func requestWeeklyWatch(wid: Int) async throws -> [WeeklyVideo] {
+    try await WebRequest.requestWeeklyWatch(wid: wid)
+  }
+
+  static func deleteToView(aid: Int, csrf: String) async throws {
+    try await WebRequest.deleteWatchLater(aid: aid, csrf: csrf)
+  }
+
+  static func logout() async throws {
+    guard let token = AccountManagerIOS.shared.currentAccount?.token else { return }
+    let parameters = sign(for: ["access_token": token.accessToken])
+    let url = "https://passport.bilibili.com/api/v2/oauth2/revoke"
+
+    let response = await AF.request(url, method: .post, parameters: parameters).serializingData()
+      .response
+
+    if let error = response.error {
+      throw error
+    }
+  }
 }

@@ -11,6 +11,21 @@ import SwiftyJSON
 @MainActor
 @Observable
 final class AccountManagerIOS {
+  // MARK: - Nested Types
+  
+  struct Profile: Codable, Equatable {
+    let mid: Int
+    var username: String
+    var avatar: String
+  }
+  
+  struct Account: Codable, Equatable {
+    var token: LoginToken
+    var profile: Profile
+    var cookies: [StoredCookie]
+    var lastActiveAt: Date
+  }
+  
   // MARK: - Singleton
 
   static let shared = AccountManagerIOS()

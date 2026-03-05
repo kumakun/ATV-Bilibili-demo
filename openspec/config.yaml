@@ -1,7 +1,8 @@
 schema: spec-driven
 
-   context: |
-     技术栈：Swift, SwiftUI；
-     有两个项目，一个是tvOS的，一个是iOS的，现在进行iOS项目的开发（从tvOS迁移功能）；
-     两个项目不要共享代码，iOS需要的代码都重新写一份
-     合理使用@Observable框架
+context: |
+  技术栈：Swift, SwiftUI；
+  有两个项目，一个是tvOS的，一个是iOS的，现在进行iOS项目的开发（从tvOS迁移功能）；
+  两个项目不要共享代码，iOS需要的代码都重新写一份；
+  合理使用@Observable框架；
+  Xcode相关操作使用mcp（编译、运行、调试）；
