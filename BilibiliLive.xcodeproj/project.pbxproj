@@ -16,6 +16,21 @@
 		499C75EC293058C9003160FB /* CocoaAsyncSocket in Frameworks */ = {isa = PBXBuildFile; productRef = 499C75EB293058C9003160FB /* CocoaAsyncSocket */; };
 		499C76132931A781003160FB /* Swifter in Frameworks */ = {isa = PBXBuildFile; productRef = 499C76122931A781003160FB /* Swifter */; };
 		499C76162931A7AE003160FB /* SwiftyXMLParser in Frameworks */ = {isa = PBXBuildFile; productRef = 499C76152931A7AE003160FB /* SwiftyXMLParser */; };
+		5C9EF4B72F596A690059486A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4B62F596A690059486A /* Alamofire */; };
+		5C9EF4B92F596A690059486A /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4B82F596A690059486A /* SwiftyJSON */; };
+		5C9EF4BB2F596A690059486A /* Gzip in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4BA2F596A690059486A /* Gzip */; };
+		5C9EF4BD2F596A690059486A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4BC2F596A690059486A /* Kingfisher */; };
+		5C9EF4BF2F596A690059486A /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4BE2F596A690059486A /* SnapKit */; };
+		5C9EF4C12F596A690059486A /* MarqueeLabel in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4C02F596A690059486A /* MarqueeLabel */; };
+		5C9EF4C32F596A690059486A /* PocketSVG in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4C22F596A690059486A /* PocketSVG */; };
+		5C9EF4C42F596A690059486A /* PocketSVG in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4C22F596A690059486A /* PocketSVG */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5C9EF4C62F596A690059486A /* CocoaAsyncSocket in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4C52F596A690059486A /* CocoaAsyncSocket */; };
+		5C9EF4C82F596A690059486A /* Swifter in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4C72F596A690059486A /* Swifter */; };
+		5C9EF4CA2F596A690059486A /* SwiftyXMLParser in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4C92F596A690059486A /* SwiftyXMLParser */; };
+		5C9EF4CC2F596A690059486A /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4CB2F596A690059486A /* CocoaLumberjack */; };
+		5C9EF4CE2F596A690059486A /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4CD2F596A690059486A /* CocoaLumberjackSwift */; };
+		5C9EF4D02F596A690059486A /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4CF2F596A690059486A /* SwiftProtobuf */; };
+		5C9EF4D22F596A690059486A /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = 5C9EF4D12F596A690059486A /* LookinServer */; };
 		695081FB2D0FD9E30063044D /* PocketSVG in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 49078E46291BEA2400F556BD /* PocketSVG */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F9171D5F2900FCFB002868C7 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = F9171D5E2900FCFB002868C7 /* SnapKit */; };
 		F927ED65260F917D00EAB8E3 /* Gzip in Frameworks */ = {isa = PBXBuildFile; productRef = F927ED64260F917D00EAB8E3 /* Gzip */; };
@@ -23,6 +38,23 @@
 		F9B5736E260F652C00771ED5 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = F9B5736D260F652C00771ED5 /* Alamofire */; };
 		F9B57378260F6BB400771ED5 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = F9B57377260F6BB400771ED5 /* SwiftyJSON */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5C9EF49B2F596A210059486A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9B57348260F5F7400771ED5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5C9EF48D2F596A200059486A;
+			remoteInfo = "BilibiliLive-iOS";
+		};
+		5C9EF4A52F596A210059486A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9B57348260F5F7400771ED5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5C9EF48D2F596A200059486A;
+			remoteInfo = "BilibiliLive-iOS";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		499C75F7293096EC003160FB /* Embed Frameworks */ = {
@@ -36,9 +68,23 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5C9EF4D32F596A690059486A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				5C9EF4C42F596A690059486A /* PocketSVG in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5C9EF48E2F596A200059486A /* BilibiliLive-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BilibiliLive-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C9EF49A2F596A210059486A /* BilibiliLive-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "BilibiliLive-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C9EF4A42F596A210059486A /* BilibiliLive-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "BilibiliLive-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9B57350260F5F7400771ED5 /* BilibiliLive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BilibiliLive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -54,9 +100,47 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4930B8FD2D686DC30074E861 /* BilibiliLive */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4930B97F2D686DC30074E861 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = BilibiliLive; sourceTree = "<group>"; };
+		5C9EF48F2F596A200059486A /* BilibiliLive-iOS */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "BilibiliLive-iOS"; sourceTree = "<group>"; };
+		5C9EF49D2F596A210059486A /* BilibiliLive-iOSTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "BilibiliLive-iOSTests"; sourceTree = "<group>"; };
+		5C9EF4A72F596A210059486A /* BilibiliLive-iOSUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "BilibiliLive-iOSUITests"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5C9EF48B2F596A200059486A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C9EF4C82F596A690059486A /* Swifter in Frameworks */,
+				5C9EF4CC2F596A690059486A /* CocoaLumberjack in Frameworks */,
+				5C9EF4CE2F596A690059486A /* CocoaLumberjackSwift in Frameworks */,
+				5C9EF4BD2F596A690059486A /* Kingfisher in Frameworks */,
+				5C9EF4B92F596A690059486A /* SwiftyJSON in Frameworks */,
+				5C9EF4C32F596A690059486A /* PocketSVG in Frameworks */,
+				5C9EF4C12F596A690059486A /* MarqueeLabel in Frameworks */,
+				5C9EF4C62F596A690059486A /* CocoaAsyncSocket in Frameworks */,
+				5C9EF4B72F596A690059486A /* Alamofire in Frameworks */,
+				5C9EF4D02F596A690059486A /* SwiftProtobuf in Frameworks */,
+				5C9EF4BB2F596A690059486A /* Gzip in Frameworks */,
+				5C9EF4BF2F596A690059486A /* SnapKit in Frameworks */,
+				5C9EF4CA2F596A690059486A /* SwiftyXMLParser in Frameworks */,
+				5C9EF4D22F596A690059486A /* LookinServer in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5C9EF4972F596A210059486A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5C9EF4A12F596A210059486A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F9B5734D260F5F7400771ED5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -81,10 +165,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5C9EF4B52F596A690059486A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		F9B57347260F5F7400771ED5 = {
 			isa = PBXGroup;
 			children = (
 				4930B8FD2D686DC30074E861 /* BilibiliLive */,
+				5C9EF48F2F596A200059486A /* BilibiliLive-iOS */,
+				5C9EF49D2F596A210059486A /* BilibiliLive-iOSTests */,
+				5C9EF4A72F596A210059486A /* BilibiliLive-iOSUITests */,
+				5C9EF4B52F596A690059486A /* Frameworks */,
 				F9B57351260F5F7400771ED5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -93,6 +188,9 @@
 			isa = PBXGroup;
 			children = (
 				F9B57350260F5F7400771ED5 /* BilibiliLive.app */,
+				5C9EF48E2F596A200059486A /* BilibiliLive-iOS.app */,
+				5C9EF49A2F596A210059486A /* BilibiliLive-iOSTests.xctest */,
+				5C9EF4A42F596A210059486A /* BilibiliLive-iOSUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -100,6 +198,89 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5C9EF48D2F596A200059486A /* BilibiliLive-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5C9EF4B22F596A210059486A /* Build configuration list for PBXNativeTarget "BilibiliLive-iOS" */;
+			buildPhases = (
+				5C9EF48A2F596A200059486A /* Sources */,
+				5C9EF48B2F596A200059486A /* Frameworks */,
+				5C9EF48C2F596A200059486A /* Resources */,
+				5C9EF4D32F596A690059486A /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5C9EF48F2F596A200059486A /* BilibiliLive-iOS */,
+			);
+			name = "BilibiliLive-iOS";
+			packageProductDependencies = (
+				5C9EF4B62F596A690059486A /* Alamofire */,
+				5C9EF4B82F596A690059486A /* SwiftyJSON */,
+				5C9EF4BA2F596A690059486A /* Gzip */,
+				5C9EF4BC2F596A690059486A /* Kingfisher */,
+				5C9EF4BE2F596A690059486A /* SnapKit */,
+				5C9EF4C02F596A690059486A /* MarqueeLabel */,
+				5C9EF4C22F596A690059486A /* PocketSVG */,
+				5C9EF4C52F596A690059486A /* CocoaAsyncSocket */,
+				5C9EF4C72F596A690059486A /* Swifter */,
+				5C9EF4C92F596A690059486A /* SwiftyXMLParser */,
+				5C9EF4CB2F596A690059486A /* CocoaLumberjack */,
+				5C9EF4CD2F596A690059486A /* CocoaLumberjackSwift */,
+				5C9EF4CF2F596A690059486A /* SwiftProtobuf */,
+				5C9EF4D12F596A690059486A /* LookinServer */,
+			);
+			productName = "BilibiliLive-iOS";
+			productReference = 5C9EF48E2F596A200059486A /* BilibiliLive-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5C9EF4992F596A210059486A /* BilibiliLive-iOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5C9EF4B32F596A210059486A /* Build configuration list for PBXNativeTarget "BilibiliLive-iOSTests" */;
+			buildPhases = (
+				5C9EF4962F596A210059486A /* Sources */,
+				5C9EF4972F596A210059486A /* Frameworks */,
+				5C9EF4982F596A210059486A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5C9EF49C2F596A210059486A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5C9EF49D2F596A210059486A /* BilibiliLive-iOSTests */,
+			);
+			name = "BilibiliLive-iOSTests";
+			packageProductDependencies = (
+			);
+			productName = "BilibiliLive-iOSTests";
+			productReference = 5C9EF49A2F596A210059486A /* BilibiliLive-iOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		5C9EF4A32F596A210059486A /* BilibiliLive-iOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5C9EF4B42F596A210059486A /* Build configuration list for PBXNativeTarget "BilibiliLive-iOSUITests" */;
+			buildPhases = (
+				5C9EF4A02F596A210059486A /* Sources */,
+				5C9EF4A12F596A210059486A /* Frameworks */,
+				5C9EF4A22F596A210059486A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5C9EF4A62F596A210059486A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5C9EF4A72F596A210059486A /* BilibiliLive-iOSUITests */,
+			);
+			name = "BilibiliLive-iOSUITests";
+			packageProductDependencies = (
+			);
+			productName = "BilibiliLive-iOSUITests";
+			productReference = 5C9EF4A42F596A210059486A /* BilibiliLive-iOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		F9B5734F260F5F7400771ED5 /* BilibiliLive */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F9B57362260F5F7600771ED5 /* Build configuration list for PBXNativeTarget "BilibiliLive" */;
@@ -145,9 +326,20 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastSwiftUpdateCheck = 1240;
+				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
+					5C9EF48D2F596A200059486A = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					5C9EF4992F596A210059486A = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 5C9EF48D2F596A200059486A;
+					};
+					5C9EF4A32F596A210059486A = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 5C9EF48D2F596A200059486A;
+					};
 					F9B5734F260F5F7400771ED5 = {
 						CreatedOnToolsVersion = 12.4;
 						LastSwiftMigration = 1240;
@@ -184,11 +376,35 @@
 			projectRoot = "";
 			targets = (
 				F9B5734F260F5F7400771ED5 /* BilibiliLive */,
+				5C9EF48D2F596A200059486A /* BilibiliLive-iOS */,
+				5C9EF4992F596A210059486A /* BilibiliLive-iOSTests */,
+				5C9EF4A32F596A210059486A /* BilibiliLive-iOSUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		5C9EF48C2F596A200059486A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5C9EF4982F596A210059486A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5C9EF4A22F596A210059486A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F9B5734E260F5F7400771ED5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -221,6 +437,27 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5C9EF48A2F596A200059486A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5C9EF4962F596A210059486A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5C9EF4A02F596A210059486A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F9B5734C260F5F7400771ED5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -230,7 +467,221 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		5C9EF49C2F596A210059486A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5C9EF48D2F596A200059486A /* BilibiliLive-iOS */;
+			targetProxy = 5C9EF49B2F596A210059486A /* PBXContainerItemProxy */;
+		};
+		5C9EF4A62F596A210059486A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5C9EF48D2F596A200059486A /* BilibiliLive-iOS */;
+			targetProxy = 5C9EF4A52F596A210059486A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		5C9EF4AC2F596A210059486A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = MB6T8NLNRW;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "XL.BilibiliLive-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development *";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5C9EF4AD2F596A210059486A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = MB6T8NLNRW;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "XL.BilibiliLive-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development *";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5C9EF4AE2F596A210059486A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "XL.BilibiliLive-iOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BilibiliLive-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BilibiliLive-iOS";
+			};
+			name = Debug;
+		};
+		5C9EF4AF2F596A210059486A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "XL.BilibiliLive-iOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BilibiliLive-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BilibiliLive-iOS";
+			};
+			name = Release;
+		};
+		5C9EF4B02F596A210059486A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "XL.BilibiliLive-iOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "BilibiliLive-iOS";
+			};
+			name = Debug;
+		};
+		5C9EF4B12F596A210059486A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "XL.BilibiliLive-iOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "BilibiliLive-iOS";
+			};
+			name = Release;
+		};
 		F9B57360260F5F7600771ED5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -415,6 +866,33 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5C9EF4B22F596A210059486A /* Build configuration list for PBXNativeTarget "BilibiliLive-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C9EF4AC2F596A210059486A /* Debug */,
+				5C9EF4AD2F596A210059486A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5C9EF4B32F596A210059486A /* Build configuration list for PBXNativeTarget "BilibiliLive-iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C9EF4AE2F596A210059486A /* Debug */,
+				5C9EF4AF2F596A210059486A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5C9EF4B42F596A210059486A /* Build configuration list for PBXNativeTarget "BilibiliLive-iOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C9EF4B02F596A210059486A /* Debug */,
+				5C9EF4B12F596A210059486A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		F9B5734B260F5F7400771ED5 /* Build configuration list for PBXProject "BilibiliLive" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -587,6 +1065,76 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 499C76142931A7AE003160FB /* XCRemoteSwiftPackageReference "SwiftyXMLParser" */;
 			productName = SwiftyXMLParser;
+		};
+		5C9EF4B62F596A690059486A /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F9B5736C260F652C00771ED5 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		5C9EF4B82F596A690059486A /* SwiftyJSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F9B57376260F6BB400771ED5 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
+			productName = SwiftyJSON;
+		};
+		5C9EF4BA2F596A690059486A /* Gzip */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F927ED63260F917D00EAB8E3 /* XCRemoteSwiftPackageReference "GzipSwift" */;
+			productName = Gzip;
+		};
+		5C9EF4BC2F596A690059486A /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F927ED9D2610B5C300EAB8E3 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+		5C9EF4BE2F596A690059486A /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F9171D5D2900FCFB002868C7 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+		5C9EF4C02F596A690059486A /* MarqueeLabel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 494741C129016CCE005D6885 /* XCRemoteSwiftPackageReference "MarqueeLabel" */;
+			productName = MarqueeLabel;
+		};
+		5C9EF4C22F596A690059486A /* PocketSVG */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49078E45291BEA2400F556BD /* XCRemoteSwiftPackageReference "PocketSVG" */;
+			productName = PocketSVG;
+		};
+		5C9EF4C52F596A690059486A /* CocoaAsyncSocket */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 499C75EA293058C9003160FB /* XCRemoteSwiftPackageReference "CocoaAsyncSocket" */;
+			productName = CocoaAsyncSocket;
+		};
+		5C9EF4C72F596A690059486A /* Swifter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 499C76112931A780003160FB /* XCRemoteSwiftPackageReference "swifter" */;
+			productName = Swifter;
+		};
+		5C9EF4C92F596A690059486A /* SwiftyXMLParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 499C76142931A7AE003160FB /* XCRemoteSwiftPackageReference "SwiftyXMLParser" */;
+			productName = SwiftyXMLParser;
+		};
+		5C9EF4CB2F596A690059486A /* CocoaLumberjack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49508E0D2943420100D26812 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			productName = CocoaLumberjack;
+		};
+		5C9EF4CD2F596A690059486A /* CocoaLumberjackSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49508E0D2943420100D26812 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			productName = CocoaLumberjackSwift;
+		};
+		5C9EF4CF2F596A690059486A /* SwiftProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0A41EE172A630FEA0066444C /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobuf;
+		};
+		5C9EF4D12F596A690059486A /* LookinServer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2806E51C2C1593A000164C10 /* XCRemoteSwiftPackageReference "LookinServer" */;
+			productName = LookinServer;
 		};
 		F9171D5E2900FCFB002868C7 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
