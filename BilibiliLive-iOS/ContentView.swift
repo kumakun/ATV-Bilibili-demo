@@ -9,17 +9,18 @@ import SwiftUI
 
 struct ContentView: View {
   @State private var selectedTab = 0
-  @State private var isLoggedIn = false
+  @Environment(AccountManagerIOS.self) var accountManager
 
   var body: some View {
-    if isLoggedIn {
+    if accountManager.isLoggedIn {
       MainTabView(selectedTab: $selectedTab)
     } else {
-      LoginView(isLoggedIn: $isLoggedIn)
+      LoginView()
     }
   }
 }
 
 #Preview {
   ContentView()
+    .environment(AccountManagerIOS.shared)
 }

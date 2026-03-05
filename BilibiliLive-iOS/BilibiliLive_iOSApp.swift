@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct BilibiliLive_iOSApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
+  @State private var accountManager = AccountManagerIOS.shared
+
+  var body: some Scene {
+    WindowGroup {
+      ContentView()
+        .environment(accountManager)
+        .onAppear {
+          accountManager.bootstrap()
         }
     }
+  }
 }
