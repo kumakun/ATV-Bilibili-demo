@@ -9,65 +9,51 @@ import SwiftUI
 
 struct ProfileView: View {
   @State private var viewModel = ProfileViewModel()
-  @State private var path = NavigationPath()
+  @State private var iPhonePath = NavigationPath()
+  @State private var iPadDetailPath = NavigationPath()
+  @State private var selectedRoute: ProfileRoute?
+  @State private var showAccountSwitcher = false
   @State private var showLogoutConfirm = false
 
+  // 设备检测：iPad 使用 SplitView，iPhone 使用 NavigationStack
+  private var isPad: Bool {
+    UIDevice.current.userInterfaceIdiom == .pad
+  }
+
+  private let sidebarRoutes: [ProfileRoute] = [
+    .followUps,
+    .followBangumi,
+    .watchHistory,
+    .watchLater,
+    .weeklyWatch,
+  ]
+
   var body: some View {
-    NavigationStack(path: $path) {
-      ScrollView {
-        VStack(spacing: 20) {
-          // 用户信息卡片
-          UserInfoCard(viewModel: viewModel)
+    Group {
+      if isPad {
+        iPadLayout
+      } else {
+        iPhoneLayout
+      }
+    }
+    .task {
+      await viewModel.loadProfile()
+    }
+    .onChange(of: viewModel.currentAccount?.profile.mid) { oldValue, newValue in
+      // 账号切换后刷新并重置 iPad 选中状态
+      if oldValue != newValue {
+        selectedRoute = nil
+        iPadDetailPath = NavigationPath()
 
-          // 数据统计
-          UserStatsView(viewModel: viewModel)
-
-          // 功能列表
-          FunctionListSection(
-            onNavigate: { route in
-              path.append(route)
-            },
-            onLogout: {
-              showLogoutConfirm = true
-            }
-          )
-        }
-        .padding()
-      }
-      .navigationTitle("我的")
-      .navigationDestination(for: ProfileRoute.self) { route in
-        switch route {
-        case .followUps:
-          FollowUpsView()
-        case .followBangumi:
-          FollowBangumiView()
-        case .watchHistory:
-          WatchHistoryView()
-        case .watchLater:
-          WatchLaterView()
-        case .weeklyWatch:
-          WeeklyWatchView()
-        case .accountSwitcher:
-          AccountSwitcherView()
-        case .videoDetail(let aid):
-          // TODO: Replace with actual video detail view
-          Text("视频详情页: \(aid)")
-        }
-      }
-      .task {
-        await viewModel.loadProfile()
-      }
-      .refreshable {
-        await viewModel.refreshProfile()
-      }
-      .onChange(of: viewModel.currentAccount?.profile.mid) { oldValue, newValue in
-        // 账号切换时自动刷新
-        if oldValue != newValue, newValue != nil {
+        if newValue != nil {
           Task {
             await viewModel.loadProfile()
           }
         }
       }
+    }
+    .sheet(isPresented: $showAccountSwitcher) {
+      AccountSwitcherView()
     }
     .confirmationDialog("确定要登出吗？", isPresented: $showLogoutConfirm, titleVisibility: .visible) {
       Button("登出", role: .destructive) {
@@ -88,6 +74,183 @@ struct ProfileView: View {
         Text(viewModel.logoutError ?? "")
       })
   }
+
+  private var iPadLayout: some View {
+    NavigationSplitView {
+      VStack(spacing: 12) {
+        UserInfoCard(viewModel: viewModel)
+          .padding(.horizontal)
+          .padding(.top, 12)
+
+        List(selection: $selectedRoute) {
+          ForEach(sidebarRoutes, id: \.self) { route in
+            NavigationLink(value: route) {
+              ProfileFunctionRow(item: item(for: route), showChevron: false)
+            }
+            .tag(route)
+            .listRowInsets(EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12))
+          }
+
+          Section {
+            Button {
+              showAccountSwitcher = true
+              selectedRoute = nil
+            } label: {
+              ProfileFunctionRow(
+                item: ProfileMenuItem(
+                  icon: "person.crop.circle.badge.checkmark",
+                  title: "账号切换",
+                  color: .gray
+                ),
+                showChevron: false
+              )
+            }
+            .listRowInsets(EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12))
+
+            Button(role: .destructive) {
+              showLogoutConfirm = true
+              selectedRoute = nil
+            } label: {
+              ProfileFunctionRow(
+                item: ProfileMenuItem(
+                  icon: "arrow.right.to.line.circle.fill",
+                  title: "登出",
+                  color: .red
+                ),
+                showChevron: false
+              )
+            }
+            .listRowInsets(EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12))
+          }
+        }
+        .listStyle(.sidebar)
+        .refreshable {
+          await viewModel.refreshProfile()
+        }
+      }
+      .background(Color(.systemGroupedBackground))
+      .navigationTitle("我的")
+    } detail: {
+      NavigationStack(path: $iPadDetailPath) {
+        Group {
+          if let route = selectedRoute {
+            destinationView(for: route)
+          } else {
+            ContentUnavailableView(
+              "请选择左侧功能",
+              systemImage: "sidebar.left"
+            )
+          }
+        }
+        .navigationDestination(for: ProfileRoute.self) { route in
+          destinationView(for: route)
+        }
+      }
+    }
+    .navigationSplitViewStyle(.balanced)
+    .navigationSplitViewColumnWidth(min: 280, ideal: 320, max: 360)
+  }
+
+  private var iPhoneLayout: some View {
+    NavigationStack(path: $iPhonePath) {
+      ScrollView {
+        VStack(spacing: 20) {
+          UserInfoCard(viewModel: viewModel)
+
+          FunctionListSection(
+            onNavigate: { route in
+              iPhonePath.append(route)
+            },
+            onLogout: {
+              showLogoutConfirm = true
+            }
+          )
+        }
+        .padding()
+      }
+      .navigationTitle("我的")
+      .navigationDestination(for: ProfileRoute.self) { route in
+        destinationView(for: route)
+      }
+      .refreshable {
+        await viewModel.refreshProfile()
+      }
+    }
+  }
+
+  @ViewBuilder
+  private func destinationView(for route: ProfileRoute) -> some View {
+    switch route {
+    case .followUps:
+      FollowUpsView()
+    case .followBangumi:
+      FollowBangumiView()
+    case .watchHistory:
+      WatchHistoryView()
+    case .watchLater:
+      WatchLaterView()
+    case .weeklyWatch:
+      WeeklyWatchView()
+    case .accountSwitcher:
+      AccountSwitcherView()
+    case .videoDetail(let aid):
+      // TODO: Replace with actual video detail view
+      Text("视频详情页: \(aid)")
+    }
+  }
+
+  private func item(for route: ProfileRoute) -> ProfileMenuItem {
+    switch route {
+    case .followUps:
+      return ProfileMenuItem(icon: "person.2.fill", title: "关注UP", color: .blue)
+    case .followBangumi:
+      return ProfileMenuItem(icon: "tv.fill", title: "追番追剧", color: .green)
+    case .watchHistory:
+      return ProfileMenuItem(icon: "clock.fill", title: "历史记录", color: .orange)
+    case .watchLater:
+      return ProfileMenuItem(icon: "eye.fill", title: "稍后再看", color: .purple)
+    case .weeklyWatch:
+      return ProfileMenuItem(icon: "flame.fill", title: "每周必看", color: .red)
+    case .accountSwitcher:
+      return ProfileMenuItem(
+        icon: "person.crop.circle.badge.checkmark", title: "账号切换", color: .gray)
+    case .videoDetail:
+      return ProfileMenuItem(icon: "play.circle.fill", title: "视频详情", color: .secondary)
+    }
+  }
+}
+
+struct ProfileMenuItem {
+  let icon: String
+  let title: String
+  let color: Color
+}
+
+private struct ProfileFunctionRow: View {
+  let item: ProfileMenuItem
+  var showChevron = true
+
+  var body: some View {
+    HStack(spacing: 16) {
+      Image(systemName: item.icon)
+        .font(.title3)
+        .foregroundStyle(item.color)
+        .frame(width: 28)
+
+      Text(item.title)
+        .foregroundStyle(.primary)
+
+      Spacer()
+
+      if showChevron {
+        Image(systemName: "chevron.right")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      }
+    }
+    .padding(.vertical, 8)
+    .padding(.horizontal, 4)
+  }
 }
 
 struct UserInfoCard: View {
@@ -96,7 +259,6 @@ struct UserInfoCard: View {
 
   var body: some View {
     HStack(spacing: 16) {
-      // 头像
       Group {
         if let avatarURL = viewModel.avatarURL {
           AsyncImage(url: avatarURL) { image in
@@ -129,7 +291,6 @@ struct UserInfoCard: View {
       .frame(width: 70, height: 70)
       .clipShape(Circle())
 
-      // 用户信息
       VStack(alignment: .leading, spacing: 6) {
         Text(viewModel.displayName)
           .font(.title3)
@@ -143,7 +304,6 @@ struct UserInfoCard: View {
 
       Spacer()
 
-      // 二维码
       Button(action: {
         showQRCode = true
       }) {
@@ -163,78 +323,48 @@ struct UserInfoCard: View {
   }
 }
 
-struct UserStatsView: View {
-  let viewModel: ProfileViewModel
-
-  var body: some View {
-    HStack(spacing: 0) {
-      StatItem(title: "关注", value: viewModel.followingCount)
-      Divider().frame(height: 40)
-      StatItem(title: "粉丝", value: viewModel.followerCount)
-      Divider().frame(height: 40)
-      StatItem(title: "获赞", value: viewModel.likesCount)
-    }
-    .padding()
-    .background(Color(.systemBackground))
-    .cornerRadius(12)
-    .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-  }
-}
-
-struct StatItem: View {
-  let title: String
-  let value: String
-
-  var body: some View {
-    VStack(spacing: 4) {
-      Text(value)
-        .font(.title3)
-        .fontWeight(.semibold)
-      Text(title)
-        .font(.caption)
-        .foregroundStyle(.secondary)
-    }
-    .frame(maxWidth: .infinity)
-  }
-}
-
 struct FunctionListSection: View {
   let onNavigate: (ProfileRoute) -> Void
   let onLogout: () -> Void
 
   var body: some View {
     VStack(spacing: 0) {
-      FunctionItem(icon: "person.2.fill", title: "关注UP", color: .blue) {
+      FunctionItem(item: ProfileMenuItem(icon: "person.2.fill", title: "关注UP", color: .blue)) {
         onNavigate(.followUps)
       }
       Divider().padding(.leading, 60)
 
-      FunctionItem(icon: "tv.fill", title: "追番追剧", color: .green) {
+      FunctionItem(item: ProfileMenuItem(icon: "tv.fill", title: "追番追剧", color: .green)) {
         onNavigate(.followBangumi)
       }
       Divider().padding(.leading, 60)
 
-      FunctionItem(icon: "clock.fill", title: "历史记录", color: .orange) {
+      FunctionItem(item: ProfileMenuItem(icon: "clock.fill", title: "历史记录", color: .orange)) {
         onNavigate(.watchHistory)
       }
       Divider().padding(.leading, 60)
 
-      FunctionItem(icon: "eye.fill", title: "稍后再看", color: .purple) {
+      FunctionItem(item: ProfileMenuItem(icon: "eye.fill", title: "稍后再看", color: .purple)) {
         onNavigate(.watchLater)
       }
       Divider().padding(.leading, 60)
 
-      FunctionItem(icon: "flame.fill", title: "每周必看", color: .red) {
+      FunctionItem(item: ProfileMenuItem(icon: "flame.fill", title: "每周必看", color: .red)) {
         onNavigate(.weeklyWatch)
       }
       Divider().padding(.leading, 60)
 
-      FunctionItem(icon: "person.crop.circle.badge.checkmark", title: "账号切换", color: .gray) {
+      FunctionItem(
+        item: ProfileMenuItem(
+          icon: "person.crop.circle.badge.checkmark", title: "账号切换", color: .gray)
+      ) {
         onNavigate(.accountSwitcher)
       }
       Divider().padding(.leading, 60)
 
-      FunctionItem(icon: "arrow.right.to.line.circle.fill", title: "登出", color: .red) {
+      FunctionItem(
+        item: ProfileMenuItem(icon: "arrow.right.to.line.circle.fill", title: "登出", color: .red)
+      ) {
         onLogout()
       }
     }
@@ -245,29 +375,14 @@ struct FunctionListSection: View {
 }
 
 struct FunctionItem: View {
-  let icon: String
-  let title: String
-  let color: Color
+  let item: ProfileMenuItem
   let action: () -> Void
 
   var body: some View {
     Button(action: action) {
-      HStack(spacing: 16) {
-        Image(systemName: icon)
-          .font(.title3)
-          .foregroundStyle(color)
-          .frame(width: 28)
-
-        Text(title)
-          .foregroundStyle(.primary)
-
-        Spacer()
-
-        Image(systemName: "chevron.right")
-          .font(.caption)
-          .foregroundStyle(.secondary)
-      }
-      .padding()
+      ProfileFunctionRow(item: item)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
     }
   }
 }

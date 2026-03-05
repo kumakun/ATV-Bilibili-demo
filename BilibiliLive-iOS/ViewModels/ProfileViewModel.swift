@@ -51,27 +51,6 @@ final class ProfileViewModel {
     userProfile?.sign ?? "这是一段个人签名..."
   }
 
-  var followingCount: String {
-    if let count = userProfile?.following {
-      return formatCount(count)
-    }
-    return "0"
-  }
-
-  var followerCount: String {
-    if let count = userProfile?.follower {
-      return formatCount(count)
-    }
-    return "0"
-  }
-
-  var likesCount: String {
-    if let count = userProfile?.likes {
-      return formatCount(count)
-    }
-    return "0"
-  }
-
   // MARK: - Methods
 
   func loadProfile() async {
@@ -110,13 +89,5 @@ final class ProfileViewModel {
     } catch {
       print("Failed to refresh profile: \(error)")
     }
-  }
-
-  private func formatCount(_ count: Int) -> String {
-    if count >= 10000 {
-      let value = Double(count) / 10000.0
-      return String(format: "%.1f万", value)
-    }
-    return "\(count)"
   }
 }

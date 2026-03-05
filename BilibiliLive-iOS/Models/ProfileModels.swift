@@ -14,18 +14,12 @@ struct UserProfile: Codable, Hashable {
   let username: String
   let avatar: String
   let sign: String
-  let following: Int
-  let follower: Int
-  let likes: Int
 
   enum CodingKeys: String, CodingKey {
     case mid
     case username = "uname"
     case avatar = "face"
     case sign
-    case following
-    case follower
-    case likes
   }
 }
 
