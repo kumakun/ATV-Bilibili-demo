@@ -297,4 +297,146 @@ enum WebRequest {
     try await ApiRequest.logout()  // Revoke the token
     AccountManagerIOS.shared.removeAllAccounts()  // Clear local account data
   }
+
+  // MARK: - Favorite APIs
+
+  static func requestFavVideosList() async throws -> [FavListDataIOS] {
+    let url = "https://api.bilibili.com/x/v3/fav/folder/created/list-all"
+    guard let mid = AccountManagerIOS.shared.currentAccount?.profile.mid else {
+      throw RequestError.statusFail(code: -1, message: "未登录")
+    }
+    let parameters: [String: Any] = ["up_mid": mid]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            do {
+              var list = try JSONDecoder().decode(
+                [FavListDataIOS].self, from: json["data"]["list"].rawData())
+              // 标记为用户自建收藏夹
+              for i in 0..<list.count {
+                list[i].isCreatedBySelf = true
+              }
+              continuation.resume(returning: list)
+            } catch {
+              continuation.resume(
+                throwing: RequestError.decodeFail(message: error.localizedDescription))
+            }
+          } else {
+            continuation.resume(
+              throwing: RequestError.statusFail(code: code, message: json["message"].stringValue))
+          }
+        case .failure:
+          continuation.resume(throwing: RequestError.networkFail)
+        }
+      }
+    }
+  }
+
+  static func requestFavVideos(mediaId: String, page: Int) async throws -> [FavDataIOS] {
+    let url = "https://api.bilibili.com/x/v3/fav/resource/list"
+    let parameters: [String: Any] = ["media_id": mediaId, "ps": 20, "pn": page, "platform": "web"]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            do {
+              let medias = json["data"]["medias"]
+              if medias == JSON.null {
+                continuation.resume(returning: [])
+              } else {
+                let list = try JSONDecoder().decode([FavDataIOS].self, from: medias.rawData())
+                continuation.resume(returning: list)
+              }
+            } catch {
+              continuation.resume(
+                throwing: RequestError.decodeFail(message: error.localizedDescription))
+            }
+          } else {
+            continuation.resume(
+              throwing: RequestError.statusFail(code: code, message: json["message"].stringValue))
+          }
+        case .failure:
+          continuation.resume(throwing: RequestError.networkFail)
+        }
+      }
+    }
+  }
+
+  static func requestFavFolderCollectedList() async throws -> [FavListDataIOS] {
+    let url = "https://api.bilibili.com/x/v3/fav/folder/collected/list"
+    guard let mid = AccountManagerIOS.shared.currentAccount?.profile.mid else {
+      throw RequestError.statusFail(code: -1, message: "未登录")
+    }
+    let parameters: [String: Any] = ["up_mid": mid, "pn": 1, "ps": 100, "platform": "web"]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            do {
+              let list = try JSONDecoder().decode(
+                [FavListDataIOS].self, from: json["data"]["list"].rawData())
+              continuation.resume(returning: list)
+            } catch {
+              continuation.resume(
+                throwing: RequestError.decodeFail(message: error.localizedDescription))
+            }
+          } else {
+            continuation.resume(
+              throwing: RequestError.statusFail(code: code, message: json["message"].stringValue))
+          }
+        case .failure:
+          continuation.resume(throwing: RequestError.networkFail)
+        }
+      }
+    }
+  }
+
+  static func requestFavSeason(seasonId: String, page: Int) async throws -> [FavDataIOS] {
+    let url = "https://api.bilibili.com/x/v3/fav/resource/list"
+    let parameters: [String: Any] = [
+      "season_id": seasonId, "ps": 20, "pn": page, "platform": "web",
+    ]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            do {
+              let medias = json["data"]["medias"]
+              if medias == JSON.null {
+                continuation.resume(returning: [])
+              } else {
+                let list = try JSONDecoder().decode([FavDataIOS].self, from: medias.rawData())
+                continuation.resume(returning: list)
+              }
+            } catch {
+              continuation.resume(
+                throwing: RequestError.decodeFail(message: error.localizedDescription))
+            }
+          } else {
+            continuation.resume(
+              throwing: RequestError.statusFail(code: code, message: json["message"].stringValue))
+          }
+        case .failure:
+          continuation.resume(throwing: RequestError.networkFail)
+        }
+      }
+    }
+  }
 }
