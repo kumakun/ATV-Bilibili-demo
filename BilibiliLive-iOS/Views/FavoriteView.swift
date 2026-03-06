@@ -64,7 +64,6 @@ struct FavoriteView: View {
           }
         }
       }
-      .navigationTitle("收藏")
       .navigationDestination(for: FavListDataIOS.self) { folder in
         FavoriteFolderView(folder: folder)
       }

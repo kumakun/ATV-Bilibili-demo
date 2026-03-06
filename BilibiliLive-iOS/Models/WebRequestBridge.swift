@@ -439,4 +439,58 @@ enum WebRequest {
       }
     }
   }
+
+  // MARK: - Follow Feed APIs
+
+  static func requestFollowsFeed(offset: String, page: Int) async throws -> DynamicFeedInfo {
+    let url = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all"
+    var parameters: [String: Any] = [
+      "type": "all",
+      "timezone_offset": "-480",
+      "page": page,
+    ]
+
+    if let offsetNum = Int(offset), offsetNum > 0 {
+      parameters["offset"] = offsetNum
+    }
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            do {
+              let feedInfo = try JSONDecoder().decode(
+                DynamicFeedInfo.self, from: json["data"].rawData())
+
+              // 如果没有视频内容且还有更多数据，递归请求下一页
+              if feedInfo.videoFeeds.isEmpty && feedInfo.hasMore {
+                Task {
+                  do {
+                    let nextFeed = try await requestFollowsFeed(
+                      offset: feedInfo.offset, page: page)
+                    continuation.resume(returning: nextFeed)
+                  } catch {
+                    continuation.resume(throwing: error)
+                  }
+                }
+              } else {
+                continuation.resume(returning: feedInfo)
+              }
+            } catch {
+              continuation.resume(
+                throwing: RequestError.decodeFail(message: error.localizedDescription))
+            }
+          } else {
+            continuation.resume(
+              throwing: RequestError.statusFail(code: code, message: json["message"].stringValue))
+          }
+        case .failure:
+          continuation.resume(throwing: RequestError.networkFail)
+        }
+      }
+    }
+  }
 }
