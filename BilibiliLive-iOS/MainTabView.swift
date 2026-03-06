@@ -14,7 +14,7 @@ struct MainTabView: View {
     TabView(selection: $selectedTab) {
       FollowView()
         .tabItem {
-          Label("关注", systemImage: "heart.fill")
+          Label("更新", systemImage: "heart.fill")
         }
         .tag(0)
 
