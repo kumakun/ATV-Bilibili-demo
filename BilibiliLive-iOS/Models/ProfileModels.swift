@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - User Profile
 
-struct UserProfile: Codable, Hashable {
+struct UserProfile: Decodable, Hashable {
   let mid: Int
   let username: String
   let avatar: String
@@ -18,18 +18,46 @@ struct UserProfile: Codable, Hashable {
   enum CodingKeys: String, CodingKey {
     case mid
     case username = "uname"
+    case name
     case avatar = "face"
     case sign
+  }
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let decodedUname = try container.decodeIfPresent(String.self, forKey: .username)
+    let decodedName = try container.decodeIfPresent(String.self, forKey: .name)
+
+    mid = try container.decodeIfPresent(Int.self, forKey: .mid) ?? 0
+    username = decodedUname ?? decodedName ?? "未登录"
+    avatar = try container.decodeIfPresent(String.self, forKey: .avatar) ?? ""
+    sign = try container.decodeIfPresent(String.self, forKey: .sign) ?? "这是一段个人签名..."
   }
 }
 
 // MARK: - Following User
 
-struct FollowingUser: Codable, Hashable, Identifiable {
+struct FollowingUser: Decodable, Hashable, Identifiable {
   let mid: Int
   let uname: String
   let face: String
   let sign: String
+
+  enum CodingKeys: String, CodingKey {
+    case mid
+    case uname
+    case face
+    case sign
+    case officialVerify = "official_verify"
+  }
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    mid = try container.decodeIfPresent(Int.self, forKey: .mid) ?? 0
+    uname = try container.decodeIfPresent(String.self, forKey: .uname) ?? "未知UP"
+    face = try container.decodeIfPresent(String.self, forKey: .face) ?? ""
+    sign = try container.decodeIfPresent(String.self, forKey: .sign) ?? ""
+  }
 
   var id: Int { mid }
 
@@ -40,7 +68,7 @@ struct FollowingUser: Codable, Hashable, Identifiable {
 
 // MARK: - History Item
 
-struct HistoryItem: Codable, Hashable, Identifiable {
+struct HistoryItem: Decodable, Hashable, Identifiable {
   let aid: Int
   let cid: Int?
   let title: String
@@ -49,6 +77,79 @@ struct HistoryItem: Codable, Hashable, Identifiable {
   let progress: Int?
   let duration: Int?
   let viewAt: Int
+
+  private enum CodingKeys: String, CodingKey {
+    case aid
+    case id
+    case cid
+    case title
+    case pic
+    case cover
+    case covers
+    case owner
+    case ownerName = "owner_name"
+    case authorName = "author_name"
+    case progress
+    case duration
+    case viewAt = "view_at"
+    case history
+  }
+
+  private enum HistoryCodingKeys: String, CodingKey {
+    case oid
+    case cid
+    case epid
+  }
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let history = try? container.nestedContainer(keyedBy: HistoryCodingKeys.self, forKey: .history)
+
+    let decodedAid = try container.decodeIfPresent(Int.self, forKey: .aid)
+    let decodedId = try container.decodeIfPresent(Int.self, forKey: .id)
+    let decodedCid = try container.decodeIfPresent(Int.self, forKey: .cid)
+    let decodedTitle = try container.decodeIfPresent(String.self, forKey: .title)
+    let decodedPic = try container.decodeIfPresent(String.self, forKey: .pic)
+    let decodedCover = try container.decodeIfPresent(String.self, forKey: .cover)
+    let coverList = try container.decodeIfPresent([String].self, forKey: .covers)
+    let decodedOwner = try container.decodeIfPresent(VideoOwner.self, forKey: .owner)
+    let decodedAuthorName = try container.decodeIfPresent(String.self, forKey: .authorName)
+    let decodedOwnerName = try container.decodeIfPresent(String.self, forKey: .ownerName)
+
+    let historyOid: Int?
+    let historyCid: Int?
+    let historyEpid: Int?
+    if let history {
+      historyOid = try history.decodeIfPresent(Int.self, forKey: .oid)
+      historyCid = try history.decodeIfPresent(Int.self, forKey: .cid)
+      historyEpid = try history.decodeIfPresent(Int.self, forKey: .epid)
+    } else {
+      historyOid = nil
+      historyCid = nil
+      historyEpid = nil
+    }
+
+    let decodedViewAt = try container.decodeIfPresent(Int.self, forKey: .viewAt) ?? 0
+    viewAt = decodedViewAt
+
+    aid = decodedAid ?? decodedId ?? historyOid ?? decodedViewAt
+
+    cid = decodedCid ?? historyCid ?? historyEpid
+
+    title = decodedTitle ?? "未知标题"
+
+    pic = decodedPic ?? decodedCover ?? coverList?.first ?? ""
+
+    if let decodedOwner {
+      owner = decodedOwner
+    } else {
+      let fallbackName = decodedAuthorName ?? decodedOwnerName ?? "未知UP主"
+      owner = VideoOwner(mid: nil, name: fallbackName, face: nil)
+    }
+
+    progress = try container.decodeIfPresent(Int.self, forKey: .progress)
+    duration = try container.decodeIfPresent(Int.self, forKey: .duration)
+  }
 
   var id: Int { aid }
 

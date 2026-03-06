@@ -96,11 +96,18 @@
 			);
 			target = F9B5734F260F5F7400771ED5 /* BilibiliLive */;
 		};
+		5C9EF8E02F5A6D9A0059486A /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5C9EF48D2F596A200059486A /* BilibiliLive-iOS */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4930B8FD2D686DC30074E861 /* BilibiliLive */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4930B97F2D686DC30074E861 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = BilibiliLive; sourceTree = "<group>"; };
-		5C9EF48F2F596A200059486A /* BilibiliLive-iOS */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "BilibiliLive-iOS"; sourceTree = "<group>"; };
+		5C9EF48F2F596A200059486A /* BilibiliLive-iOS */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (5C9EF8E02F5A6D9A0059486A /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "BilibiliLive-iOS"; sourceTree = "<group>"; };
 		5C9EF49D2F596A210059486A /* BilibiliLive-iOSTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "BilibiliLive-iOSTests"; sourceTree = "<group>"; };
 		5C9EF4A72F596A210059486A /* BilibiliLive-iOSUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "BilibiliLive-iOSUITests"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -497,6 +504,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "BilibiliLive-iOS/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -544,6 +552,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "BilibiliLive-iOS/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

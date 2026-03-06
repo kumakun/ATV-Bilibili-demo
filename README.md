@@ -22,6 +22,13 @@
 - HDR播放
 - 字幕
 
+### iOS 个人中心（Profile）适配说明
+
+- iPad 设备使用 `NavigationSplitView` 双栏布局（侧边栏 + 详情区）
+- iPhone 设备保持原有 `NavigationStack` push 导航交互
+- 已移除个人中心「关注 / 粉丝 / 获赞」统计卡片，页面更简洁
+- iPad 侧边栏支持功能直达、账号切换模态展示与登出确认对话框
+
  ![](imgs/1.jpg)
  ![](imgs/2.jpg)
  ![](imgs/3.png)

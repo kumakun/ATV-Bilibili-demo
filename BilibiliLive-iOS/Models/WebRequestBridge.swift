@@ -70,7 +70,15 @@ enum WebRequest {
 
   static func requestFollowingUps(page: Int = 1) async throws -> [FollowingUser] {
     let url = "https://api.bilibili.com/x/relation/followings"
-    let parameters: [String: Any] = ["pn": page, "ps": 40]
+    guard let mid = AccountManagerIOS.shared.currentAccount?.profile.mid else {
+      throw RequestError.statusFail(code: -1, message: "未登录")
+    }
+    let parameters: [String: Any] = [
+      "vmid": mid,
+      "order_type": "attention",
+      "pn": page,
+      "ps": 40,
+    ]
 
     return try await withCheckedThrowingContinuation { continuation in
       AF.request(url, parameters: parameters).responseData { response in

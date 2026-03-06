@@ -129,7 +129,6 @@ struct ProfileView: View {
         }
       }
       .background(Color(.systemGroupedBackground))
-      .navigationTitle("我的")
     } detail: {
       NavigationStack(path: $iPadDetailPath) {
         Group {
@@ -168,7 +167,6 @@ struct ProfileView: View {
         }
         .padding()
       }
-      .navigationTitle("我的")
       .navigationDestination(for: ProfileRoute.self) { route in
         destinationView(for: route)
       }

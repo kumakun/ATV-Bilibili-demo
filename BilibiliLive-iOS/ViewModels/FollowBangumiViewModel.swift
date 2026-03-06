@@ -44,6 +44,19 @@ final class FollowBangumiViewModel {
     do {
       let items = try await ApiRequest.requestFollowBangumi(type: selectedType.rawValue, page: 1)
 
+      // Log cover URLs for preview testing
+      if !items.isEmpty {
+        print("=== Bangumi Cover URLs (for Preview) ===")
+        for (index, item) in items.prefix(6).enumerated() {
+          print("[\(index)] \(item.title)")
+          print("    cover: \(item.cover)")
+          if let newEpCover = item.newEp?.cover {
+            print("    newEp.cover: \(newEpCover)")
+          }
+        }
+        print("======================================")
+      }
+
       if selectedType == .anime {
         animeItems = items
         animePage = 1
