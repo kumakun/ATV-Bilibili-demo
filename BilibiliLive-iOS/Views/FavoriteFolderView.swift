@@ -80,6 +80,17 @@ struct FavoriteFolderView: View {
     }
     .navigationTitle(folder.title)
     .navigationBarTitleDisplayMode(.inline)
+    .navigationDestination(for: FavDataIOS.self) { video in
+      // 根据视频类型导航到不同页面
+      if video.ogv != nil {
+        // OGV内容（番剧、影视等）暂时使用占位视图
+        Text("OGV详情页待实现")
+          .navigationTitle(video.title)
+      } else {
+        // 普通视频
+        VideoDetailView(aid: video.id)
+      }
+    }
     .task {
       if viewModel.videos.isEmpty {
         await viewModel.loadVideos()
@@ -92,9 +103,7 @@ struct FavoriteFolderView: View {
   @ViewBuilder
   private var videoList: some View {
     ForEach(viewModel.videos) { video in
-      Button {
-        viewModel.navigateToVideo(video)
-      } label: {
+      NavigationLink(value: video) {
         VideoCard(video: video)
       }
       .buttonStyle(.plain)

@@ -200,4 +200,211 @@ enum ApiRequest {
       throw error
     }
   }
+
+  // MARK: - Video Interaction APIs
+
+  /// 点赞视频
+  static func requestLike(aid: Int, like: Bool) async throws -> Bool {
+    let url = "https://api.bilibili.com/x/web-interface/archive/like"
+    let parameters: [String: Any] = [
+      "aid": aid,
+      "like": like ? "1" : "2",
+    ]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, method: .post, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            continuation.resume(returning: true)
+          } else {
+            continuation.resume(returning: false)
+          }
+        case .failure:
+          continuation.resume(returning: false)
+        }
+      }
+    }
+  }
+
+  /// 获取点赞状态
+  static func requestLikeStatus(aid: Int) async throws -> Bool {
+    let url = "https://api.bilibili.com/x/web-interface/archive/has/like"
+    let parameters: [String: Any] = ["aid": aid]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            continuation.resume(returning: json["data"].intValue == 1)
+          } else {
+            continuation.resume(returning: false)
+          }
+        case .failure:
+          continuation.resume(returning: false)
+        }
+      }
+    }
+  }
+
+  /// 投币
+  static func requestCoin(aid: Int, num: Int) async throws -> Bool {
+    let url = "https://api.bilibili.com/x/web-interface/coin/add"
+    let parameters: [String: Any] = [
+      "aid": aid,
+      "multiply": num,
+      "select_like": 1,
+    ]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, method: .post, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            continuation.resume(returning: true)
+          } else {
+            continuation.resume(returning: false)
+          }
+        case .failure:
+          continuation.resume(returning: false)
+        }
+      }
+    }
+  }
+
+  /// 获取投币状态
+  static func requestCoinStatus(aid: Int) async throws -> Int {
+    let url = "https://api.bilibili.com/x/web-interface/archive/coins"
+    let parameters: [String: Any] = ["aid": aid]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            continuation.resume(returning: json["data"]["multiply"].intValue)
+          } else {
+            continuation.resume(returning: 0)
+          }
+        case .failure:
+          continuation.resume(returning: 0)
+        }
+      }
+    }
+  }
+
+  /// 收藏视频
+  static func requestFavorite(aid: Int, mid: Int) async throws -> Bool {
+    let url = "https://api.bilibili.com/x/v3/fav/resource/deal"
+    let parameters: [String: Any] = [
+      "rid": aid,
+      "type": 2,
+      "add_media_ids": mid,
+    ]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, method: .post, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            continuation.resume(returning: true)
+          } else {
+            continuation.resume(returning: false)
+          }
+        case .failure:
+          continuation.resume(returning: false)
+        }
+      }
+    }
+  }
+
+  /// 取消收藏
+  static func removeFavorite(aid: Int, midList: [Int]) async throws -> Bool {
+    let url = "https://api.bilibili.com/x/v3/fav/resource/deal"
+    let parameters: [String: Any] = [
+      "rid": aid,
+      "type": 2,
+      "del_media_ids": midList.map { "\($0)" }.joined(separator: ","),
+    ]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, method: .post, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            continuation.resume(returning: true)
+          } else {
+            continuation.resume(returning: false)
+          }
+        case .failure:
+          continuation.resume(returning: false)
+        }
+      }
+    }
+  }
+
+  /// 获取收藏状态
+  static func requestFavoriteStatus(aid: Int) async throws -> Bool {
+    let url = "https://api.bilibili.com/x/v2/fav/video/favoured"
+    let parameters: [String: Any] = ["aid": aid]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            continuation.resume(returning: json["data"]["favoured"].boolValue)
+          } else {
+            continuation.resume(returning: false)
+          }
+        case .failure:
+          continuation.resume(returning: false)
+        }
+      }
+    }
+  }
+
+  // MARK: - Follow APIs
+
+  /// 关注/取关UP主
+  static func follow(mid: Int, follow: Bool) async throws -> Bool {
+    let url = "https://api.bilibili.com/x/relation/modify"
+    let parameters: [String: Any] = [
+      "fid": mid,
+      "act": follow ? 1 : 2,
+      "re_src": 14,
+    ]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, method: .post, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            continuation.resume(returning: true)
+          } else {
+            continuation.resume(returning: false)
+          }
+        case .failure:
+          continuation.resume(returning: false)
+        }
+      }
+    }
+  }
 }

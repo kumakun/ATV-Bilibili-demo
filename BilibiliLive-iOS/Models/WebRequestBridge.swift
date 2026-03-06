@@ -493,4 +493,136 @@ enum WebRequest {
       }
     }
   }
+
+  // MARK: - Video Detail APIs
+
+  static func requestVideoDetail(aid: Int) async throws -> VideoDetail {
+    let url = "https://api.bilibili.com/x/web-interface/view/detail"
+    let parameters: [String: Any] = ["aid": aid]
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          if code == 0 {
+            do {
+              let videoDetail = try JSONDecoder().decode(
+                VideoDetail.self, from: json["data"].rawData())
+              continuation.resume(returning: videoDetail)
+            } catch {
+              print("Decode error: \(error)")
+              continuation.resume(
+                throwing: RequestError.decodeFail(message: error.localizedDescription))
+            }
+          } else {
+            continuation.resume(
+              throwing: RequestError.statusFail(code: code, message: json["message"].stringValue))
+          }
+        case .failure:
+          continuation.resume(throwing: RequestError.networkFail)
+        }
+      }
+    }
+  }
+
+  static func requestPlayUrl(aid: Int, cid: Int) async throws -> VideoPlayURLInfo {
+    let url = "https://api.bilibili.com/x/player/playurl"
+    // 请求最高画质 (fnval=976 支持DASH/杜比视界/8K, qn=127 请求8K)
+    let parameters: [String: Any] = [
+      "avid": aid,
+      "cid": cid,
+      "qn": 127,  // 最高画质
+      "type": "",
+      "fnver": 0,
+      "fnval": 976,  // DASH格式
+      "otype": "json",
+    ]
+
+    print("📡 WebRequestBridge: Requesting play URL with aid=\(aid), cid=\(cid)")
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          print("📡 WebRequestBridge: Response code=\(code)")
+          if code == 0 {
+            do {
+              let playURLInfo = try JSONDecoder().decode(
+                VideoPlayURLInfo.self, from: json["data"].rawData())
+              print("✅ WebRequestBridge: Decoded successfully")
+              print("   Quality: \(playURLInfo.quality)")
+              print("   Video streams: \(playURLInfo.dash?.video.count ?? 0)")
+              print("   Audio streams: \(playURLInfo.dash?.audio?.count ?? 0)")
+              continuation.resume(returning: playURLInfo)
+            } catch {
+              print("❌ WebRequestBridge: Decode error: \(error)")
+              continuation.resume(
+                throwing: RequestError.decodeFail(message: error.localizedDescription))
+            }
+          } else {
+            print("❌ WebRequestBridge: API error code \(code): \(json["message"].stringValue)")
+            continuation.resume(
+              throwing: RequestError.statusFail(code: code, message: json["message"].stringValue))
+          }
+        case .failure:
+          print("❌ WebRequestBridge: Network failure")
+          continuation.resume(throwing: RequestError.networkFail)
+        }
+      }
+    }
+  }
+
+  static func requestDirectPlayUrl(aid: Int, cid: Int) async throws -> VideoPlayURLInfo {
+    let url = "https://api.bilibili.com/x/player/playurl"
+    let parameters: [String: Any] = [
+      "avid": aid,
+      "cid": cid,
+      "qn": 64,
+      "type": "",
+      "fnver": 0,
+      "fnval": 0,
+      "otype": "json",
+      "fourk": 0,
+    ]
+
+    print("📡 WebRequestBridge: Requesting direct play URL with aid=\(aid), cid=\(cid)")
+
+    return try await withCheckedThrowingContinuation { continuation in
+      AF.request(url, parameters: parameters).responseData { response in
+        switch response.result {
+        case .success(let data):
+          let json = JSON(data)
+          let code = json["code"].intValue
+          print("📡 WebRequestBridge: Direct play response code=\(code)")
+          if code == 0 {
+            do {
+              let playURLInfo = try JSONDecoder().decode(
+                VideoPlayURLInfo.self, from: json["data"].rawData())
+              print("✅ WebRequestBridge: Direct play URL decoded successfully")
+              print("   Format: \(playURLInfo.format ?? "unknown")")
+              print("   Durl count: \(playURLInfo.durl?.count ?? 0)")
+              continuation.resume(returning: playURLInfo)
+            } catch {
+              print("❌ WebRequestBridge: Direct play decode error: \(error)")
+              continuation.resume(
+                throwing: RequestError.decodeFail(message: error.localizedDescription))
+            }
+          } else {
+            print(
+              "❌ WebRequestBridge: Direct play API error code \(code): \(json["message"].stringValue)"
+            )
+            continuation.resume(
+              throwing: RequestError.statusFail(code: code, message: json["message"].stringValue))
+          }
+        case .failure:
+          print("❌ WebRequestBridge: Direct play network failure")
+          continuation.resume(throwing: RequestError.networkFail)
+        }
+      }
+    }
+  }
 }

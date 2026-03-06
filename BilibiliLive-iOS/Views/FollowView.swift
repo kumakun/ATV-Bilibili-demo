@@ -58,7 +58,7 @@ struct FollowView: View {
         }
       }
       .navigationDestination(for: DynamicFeedData.self) { feed in
-        VideoDetailPlaceholderView(feed: feed)
+        VideoDetailView(aid: feed.aid)
       }
       .task {
         await viewModel.loadInitial()
@@ -146,41 +146,6 @@ private struct DynamicFeedCard: View {
     .background(Color(.systemBackground))
     .cornerRadius(12)
     .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-  }
-}
-
-// MARK: - VideoDetailPlaceholderView
-
-private struct VideoDetailPlaceholderView: View {
-  let feed: DynamicFeedData
-
-  var body: some View {
-    VStack(spacing: 20) {
-      Text("视频详情页")
-        .font(.largeTitle)
-        .fontWeight(.bold)
-
-      VStack(alignment: .leading, spacing: 8) {
-        Text("标题: \(feed.title)")
-        Text("AID: \(feed.aid)")
-        Text("UP主: \(feed.ownerName)")
-        if let epid = feed.epid {
-          Text("EPID: \(epid)")
-        }
-      }
-      .font(.body)
-      .frame(maxWidth: .infinity, alignment: .leading)
-      .padding()
-      .background(Color(.systemGray6))
-      .cornerRadius(12)
-      .padding()
-
-      Text("详情页面待实现")
-        .foregroundStyle(.secondary)
-    }
-    .padding()
-    .navigationTitle("视频详情")
-    .navigationBarTitleDisplayMode(.inline)
   }
 }
 
