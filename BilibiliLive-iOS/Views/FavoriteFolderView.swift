@@ -80,6 +80,7 @@ struct FavoriteFolderView: View {
     }
     .navigationTitle(folder.title)
     .navigationBarTitleDisplayMode(.inline)
+    .secondaryPageTabBarHidden()
     .navigationDestination(for: FavDataIOS.self) { video in
       // 根据视频类型导航到不同页面
       if video.ogv != nil {

@@ -108,6 +108,7 @@ struct VideoDetailView: View {
     }
     .navigationTitle("视频详情")
     .navigationBarTitleDisplayMode(.inline)
+    .secondaryPageTabBarHidden()
     .refreshable {
       await viewModel.loadVideoDetail()
       await viewModel.loadPlayUrl()

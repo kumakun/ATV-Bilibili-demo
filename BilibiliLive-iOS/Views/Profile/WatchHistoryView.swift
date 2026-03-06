@@ -102,5 +102,6 @@ private struct HistoryDetailPlaceholderView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .padding()
     .navigationTitle("视频详情")
+    .secondaryPageTabBarHidden()
   }
 }

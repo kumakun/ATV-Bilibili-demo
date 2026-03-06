@@ -34,6 +34,17 @@ struct MainTabView: View {
   }
 }
 
+extension View {
+  @ViewBuilder
+  func secondaryPageTabBarHidden(_ hidden: Bool = true) -> some View {
+    if hidden {
+      toolbar(.hidden, for: .tabBar)
+    } else {
+      self
+    }
+  }
+}
+
 #Preview {
   MainTabView(selectedTab: .constant(0))
 }

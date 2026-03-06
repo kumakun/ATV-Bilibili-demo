@@ -169,6 +169,7 @@ struct ProfileView: View {
       }
       .navigationDestination(for: ProfileRoute.self) { route in
         destinationView(for: route)
+          .secondaryPageTabBarHidden()
       }
       .refreshable {
         await viewModel.refreshProfile()

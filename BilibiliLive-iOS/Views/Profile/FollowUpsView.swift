@@ -124,5 +124,6 @@ private struct UpSpacePlaceholderView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .padding()
     .navigationTitle("UP空间")
+    .secondaryPageTabBarHidden()
   }
 }
