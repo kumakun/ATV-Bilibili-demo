@@ -1,6 +1,7 @@
 {
   "images" : [
     {
+      "filename" : "哔哩哔哩-弹幕番剧直播高清视频-iOS-512x512-2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -12,6 +13,7 @@
           "value" : "dark"
         }
       ],
+      "filename" : "哔哩哔哩-弹幕番剧直播高清视频-iOS-512x512-2 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -23,6 +25,7 @@
           "value" : "tinted"
         }
       ],
+      "filename" : "哔哩哔哩-弹幕番剧直播高清视频-iOS-512x512-2 2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
