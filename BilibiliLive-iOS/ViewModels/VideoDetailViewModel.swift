@@ -28,6 +28,37 @@ struct VideoPlayerReloadPolicy {
   }
 }
 
+struct VideoPlayURLLoading {
+  var requestPlayURL: (Int, Int) async throws -> VideoPlayURLInfo
+  var requestDirectPlayURL: (Int, Int) async throws -> VideoPlayURLInfo
+
+  static let live = VideoPlayURLLoading(
+    requestPlayURL: { aid, cid in
+      try await WebRequest.requestPlayUrl(aid: aid, cid: cid)
+    },
+    requestDirectPlayURL: { aid, cid in
+      try await WebRequest.requestDirectPlayUrl(aid: aid, cid: cid)
+    }
+  )
+}
+
+struct VideoPlayerBuilding {
+  var makeDashPlayer: (VideoPlayURLInfo, Int) async -> AVPlayer?
+  var makeDirectPlayer: (URL, Int) -> AVPlayer
+
+  static let live = VideoPlayerBuilding(
+    makeDashPlayer: { playURLInfo, aid in
+      guard let (videoURL, audioURL) = DASHVideoPlayer.extractBestStreams(from: playURLInfo) else {
+        return nil
+      }
+      return await DASHVideoPlayer.createPlayer(videoURL: videoURL, audioURL: audioURL, aid: aid)
+    },
+    makeDirectPlayer: { url, aid in
+      DASHVideoPlayer.createDirectPlayer(url: url, aid: aid)
+    }
+  )
+}
+
 @MainActor
 @Observable
 final class VideoDetailViewModel {
@@ -54,14 +85,23 @@ final class VideoDetailViewModel {
   // 视频ID
   private let aid: Int
   private var cid: Int
+  private let playURLLoader: VideoPlayURLLoading
+  private let playerBuilder: VideoPlayerBuilding
   private var currentPlayerCID: Int?
   private var isLoadingPlayURL = false
 
   // MARK: - Initialization
 
-  init(aid: Int, cid: Int = 0) {
+  init(
+    aid: Int,
+    cid: Int = 0,
+    playURLLoader: VideoPlayURLLoading = .live,
+    playerBuilder: VideoPlayerBuilding = .live
+  ) {
     self.aid = aid
     self.cid = cid
+    self.playURLLoader = playURLLoader
+    self.playerBuilder = playerBuilder
   }
 
   // MARK: - Load Video Detail
@@ -128,30 +168,21 @@ final class VideoDetailViewModel {
     defer { isLoadingPlayURL = false }
 
     do {
-      let playURLInfo = try await WebRequest.requestPlayUrl(aid: aid, cid: cid)
+      let playURLInfo = try await playURLLoader.requestPlayURL(aid, cid)
       print("✅ VideoDetailViewModel: Got play URL info, quality=\(playURLInfo.quality)")
       print("   Video streams: \(playURLInfo.dash?.video.count ?? 0)")
       print("   Audio streams: \(playURLInfo.dash?.audio?.count ?? 0)")
 
-      // 使用DASH播放器创建支持音视频分离的播放器
-      if let (videoURL, audioURL) = DASHVideoPlayer.extractBestStreams(from: playURLInfo) {
-        playURL = videoURL
-        
-        // 创建DASH播放器（合并音视频），传递aid用于防盗链验证
-        if let dashPlayer = await DASHVideoPlayer.createPlayer(videoURL: videoURL, audioURL: audioURL, aid: aid) {
-          player = dashPlayer
-          currentPlayerCID = cid
-          print("✅ VideoDetailViewModel: DASH player created successfully")
-          
-          // 自动开始播放
-          player?.play()
-          print("✅ VideoDetailViewModel: Player.play() called")
-        } else {
-          print("⚠️ VideoDetailViewModel: Failed to create DASH player, trying direct fallback")
-          try await loadDirectPlayFallback()
-        }
+      if let dashPlayer = await playerBuilder.makeDashPlayer(playURLInfo, aid) {
+        playURL = playURLInfo.bestVideoURL
+        player = dashPlayer
+        currentPlayerCID = cid
+        print("✅ VideoDetailViewModel: DASH player created successfully")
+
+        player?.play()
+        print("✅ VideoDetailViewModel: Player.play() called")
       } else {
-        print("⚠️ VideoDetailViewModel: Failed to extract DASH streams, trying direct fallback")
+        print("⚠️ VideoDetailViewModel: Failed to create DASH player, trying direct fallback")
         try await loadDirectPlayFallback()
       }
     } catch {
@@ -166,7 +197,7 @@ final class VideoDetailViewModel {
   }
 
   private func loadDirectPlayFallback() async throws {
-    let directPlayInfo = try await WebRequest.requestDirectPlayUrl(aid: aid, cid: cid)
+    let directPlayInfo = try await playURLLoader.requestDirectPlayURL(aid, cid)
 
     guard let directURL = directPlayInfo.bestDirectPlayURL else {
       print("❌ VideoDetailViewModel: Direct fallback URL not found")
@@ -175,7 +206,7 @@ final class VideoDetailViewModel {
     }
 
     playURL = directURL
-    let directPlayer = DASHVideoPlayer.createDirectPlayer(url: directURL, aid: aid)
+    let directPlayer = playerBuilder.makeDirectPlayer(directURL, aid)
     player = directPlayer
     currentPlayerCID = cid
     print("✅ VideoDetailViewModel: Direct fallback player created successfully")
