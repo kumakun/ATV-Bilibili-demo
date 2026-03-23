@@ -39,6 +39,7 @@
 
 ## Xcode 与 MCP
 
-- 所有 Xcode 相关操作优先通过 MCP 完成，包括编译、运行、调试、查看工程配置、scheme 和 destination。
+- 所有 Xcode 相关操作优先通过 xcode-tools MCP 完成，包括编译、运行、调试、查看工程配置、scheme 和 destination。
 - 非必要不要手动修改 Xcode 工程配置；如果必须调整工程设置，先确认是否有对应的 MCP 操作可以完成。
 - 在反馈构建、运行或调试结果时，应明确说明执行了哪些 MCP 操作，以及关键结论或失败信息。
+- 使用 xcodebuild 命令之前先试试 xcode-tools mcp是否可用。
