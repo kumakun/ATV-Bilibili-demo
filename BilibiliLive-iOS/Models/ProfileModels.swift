@@ -263,30 +263,6 @@ struct NewEpisode: Codable, Hashable {
   }
 }
 
-// MARK: - Weekly Watch
-
-struct WeeklyList: Codable, Hashable, Identifiable {
-  let number: Int
-  let subject: String
-  let name: String
-
-  var id: Int { number }
-}
-
-struct WeeklyVideo: Codable, Hashable, Identifiable {
-  let aid: Int
-  let title: String
-  let pic: String
-  let owner: VideoOwner
-  let stat: VideoStat?
-
-  var id: Int { aid }
-
-  var picURL: URL? {
-    URL(string: pic)
-  }
-}
-
 // MARK: - Profile Route
 
 enum ProfileRoute: Hashable {
@@ -294,7 +270,6 @@ enum ProfileRoute: Hashable {
   case followBangumi
   case watchHistory
   case watchLater
-  case weeklyWatch
   case videoDetail(aid: Int)
   case accountSwitcher
 }

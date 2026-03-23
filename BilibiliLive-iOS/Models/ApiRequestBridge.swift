@@ -176,14 +176,6 @@ enum ApiRequest {
     try await WebRequest.requestFollowBangumi(type: type, page: page)
   }
 
-  static func requestWeeklyWatchList() async throws -> [WeeklyList] {
-    try await WebRequest.requestWeeklyWatchList()
-  }
-
-  static func requestWeeklyWatch(wid: Int) async throws -> [WeeklyVideo] {
-    try await WebRequest.requestWeeklyWatch(wid: wid)
-  }
-
   static func deleteToView(aid: Int, csrf: String) async throws {
     try await WebRequest.deleteWatchLater(aid: aid, csrf: csrf)
   }

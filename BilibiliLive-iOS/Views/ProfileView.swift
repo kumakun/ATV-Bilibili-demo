@@ -20,14 +20,6 @@ struct ProfileView: View {
     UIDevice.current.userInterfaceIdiom == .pad
   }
 
-  private let sidebarRoutes: [ProfileRoute] = [
-    .followUps,
-    .followBangumi,
-    .watchHistory,
-    .watchLater,
-    .weeklyWatch,
-  ]
-
   var body: some View {
     Group {
       if isPad {
@@ -83,9 +75,9 @@ struct ProfileView: View {
           .padding(.top, 12)
 
         List(selection: $selectedRoute) {
-          ForEach(sidebarRoutes, id: \.self) { route in
+          ForEach(ProfileRoute.primaryRoutes, id: \.self) { route in
             NavigationLink(value: route) {
-              ProfileFunctionRow(item: item(for: route), showChevron: false)
+              ProfileFunctionRow(item: route.menuItem, showChevron: false)
             }
             .tag(route)
             .listRowInsets(EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12))
@@ -188,33 +180,11 @@ struct ProfileView: View {
       WatchHistoryView()
     case .watchLater:
       WatchLaterView()
-    case .weeklyWatch:
-      WeeklyWatchView()
     case .accountSwitcher:
       AccountSwitcherView()
     case .videoDetail(let aid):
       // TODO: Replace with actual video detail view
       Text("视频详情页: \(aid)")
-    }
-  }
-
-  private func item(for route: ProfileRoute) -> ProfileMenuItem {
-    switch route {
-    case .followUps:
-      return ProfileMenuItem(icon: "person.2.fill", title: "关注UP", color: .blue)
-    case .followBangumi:
-      return ProfileMenuItem(icon: "tv.fill", title: "追番追剧", color: .green)
-    case .watchHistory:
-      return ProfileMenuItem(icon: "clock.fill", title: "历史记录", color: .orange)
-    case .watchLater:
-      return ProfileMenuItem(icon: "eye.fill", title: "稍后再看", color: .purple)
-    case .weeklyWatch:
-      return ProfileMenuItem(icon: "flame.fill", title: "每周必看", color: .red)
-    case .accountSwitcher:
-      return ProfileMenuItem(
-        icon: "person.crop.circle.badge.checkmark", title: "账号切换", color: .gray)
-    case .videoDetail:
-      return ProfileMenuItem(icon: "play.circle.fill", title: "视频详情", color: .secondary)
     }
   }
 }
@@ -223,6 +193,33 @@ struct ProfileMenuItem {
   let icon: String
   let title: String
   let color: Color
+}
+
+extension ProfileRoute {
+  static let primaryRoutes: [ProfileRoute] = [
+    .followUps,
+    .followBangumi,
+    .watchHistory,
+    .watchLater,
+  ]
+
+  var menuItem: ProfileMenuItem {
+    switch self {
+    case .followUps:
+      return ProfileMenuItem(icon: "person.2.fill", title: "关注UP", color: .blue)
+    case .followBangumi:
+      return ProfileMenuItem(icon: "tv.fill", title: "追番追剧", color: .green)
+    case .watchHistory:
+      return ProfileMenuItem(icon: "clock.fill", title: "历史记录", color: .orange)
+    case .watchLater:
+      return ProfileMenuItem(icon: "eye.fill", title: "稍后再看", color: .purple)
+    case .accountSwitcher:
+      return ProfileMenuItem(
+        icon: "person.crop.circle.badge.checkmark", title: "账号切换", color: .gray)
+    case .videoDetail:
+      return ProfileMenuItem(icon: "play.circle.fill", title: "视频详情", color: .secondary)
+    }
+  }
 }
 
 private struct ProfileFunctionRow: View {
@@ -328,29 +325,16 @@ struct FunctionListSection: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      FunctionItem(item: ProfileMenuItem(icon: "person.2.fill", title: "关注UP", color: .blue)) {
-        onNavigate(.followUps)
-      }
-      Divider().padding(.leading, 60)
+      ForEach(ProfileRoute.primaryRoutes, id: \.self) { route in
+        FunctionItem(item: route.menuItem) {
+          onNavigate(route)
+        }
 
-      FunctionItem(item: ProfileMenuItem(icon: "tv.fill", title: "追番追剧", color: .green)) {
-        onNavigate(.followBangumi)
+        if route != ProfileRoute.primaryRoutes.last {
+          Divider().padding(.leading, 60)
+        }
       }
-      Divider().padding(.leading, 60)
 
-      FunctionItem(item: ProfileMenuItem(icon: "clock.fill", title: "历史记录", color: .orange)) {
-        onNavigate(.watchHistory)
-      }
-      Divider().padding(.leading, 60)
-
-      FunctionItem(item: ProfileMenuItem(icon: "eye.fill", title: "稍后再看", color: .purple)) {
-        onNavigate(.watchLater)
-      }
-      Divider().padding(.leading, 60)
-
-      FunctionItem(item: ProfileMenuItem(icon: "flame.fill", title: "每周必看", color: .red)) {
-        onNavigate(.weeklyWatch)
-      }
       Divider().padding(.leading, 60)
 
       FunctionItem(
