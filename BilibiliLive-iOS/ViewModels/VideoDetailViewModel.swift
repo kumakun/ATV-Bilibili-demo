@@ -9,6 +9,25 @@ import AVFoundation
 import Foundation
 import Observation
 
+struct VideoPlayerReloadPolicy {
+  static func shouldReloadPlayer(
+    currentPlayerCID: Int?,
+    requestedCID: Int,
+    hasPlayer: Bool,
+    forceReload: Bool
+  ) -> Bool {
+    if forceReload {
+      return true
+    }
+
+    guard hasPlayer else {
+      return true
+    }
+
+    return currentPlayerCID != requestedCID
+  }
+}
+
 @MainActor
 @Observable
 final class VideoDetailViewModel {
@@ -35,6 +54,8 @@ final class VideoDetailViewModel {
   // 视频ID
   private let aid: Int
   private var cid: Int
+  private var currentPlayerCID: Int?
+  private var isLoadingPlayURL = false
 
   // MARK: - Initialization
 
@@ -81,13 +102,30 @@ final class VideoDetailViewModel {
 
   // MARK: - Load Play URL
 
-  func loadPlayUrl() async {
+  func loadPlayUrl(forceReload: Bool = false) async {
     guard cid > 0 else {
       print("❌ VideoDetailViewModel: cid is 0, cannot load play URL")
       return
     }
 
+    guard !isLoadingPlayURL else {
+      print("⚠️ VideoDetailViewModel: Play URL is already loading")
+      return
+    }
+
+    guard VideoPlayerReloadPolicy.shouldReloadPlayer(
+      currentPlayerCID: currentPlayerCID,
+      requestedCID: cid,
+      hasPlayer: player != nil,
+      forceReload: forceReload
+    ) else {
+      print("✅ VideoDetailViewModel: Reusing existing player for aid=\(aid), cid=\(cid)")
+      return
+    }
+
     print("📹 VideoDetailViewModel: Loading play URL for aid=\(aid), cid=\(cid)")
+    isLoadingPlayURL = true
+    defer { isLoadingPlayURL = false }
 
     do {
       let playURLInfo = try await WebRequest.requestPlayUrl(aid: aid, cid: cid)
@@ -102,6 +140,7 @@ final class VideoDetailViewModel {
         // 创建DASH播放器（合并音视频），传递aid用于防盗链验证
         if let dashPlayer = await DASHVideoPlayer.createPlayer(videoURL: videoURL, audioURL: audioURL, aid: aid) {
           player = dashPlayer
+          currentPlayerCID = cid
           print("✅ VideoDetailViewModel: DASH player created successfully")
           
           // 自动开始播放
@@ -138,6 +177,7 @@ final class VideoDetailViewModel {
     playURL = directURL
     let directPlayer = DASHVideoPlayer.createDirectPlayer(url: directURL, aid: aid)
     player = directPlayer
+    currentPlayerCID = cid
     print("✅ VideoDetailViewModel: Direct fallback player created successfully")
     player?.play()
     print("✅ VideoDetailViewModel: Direct fallback Player.play() called")
@@ -271,6 +311,7 @@ final class VideoDetailViewModel {
     player?.pause()
     player = nil
     playURL = nil
+    currentPlayerCID = nil
 
     // 加载新的播放地址
     await loadPlayUrl()

@@ -37,7 +37,7 @@ struct VideoDetailView: View {
             Button("重试") {
               Task {
                 await viewModel.loadVideoDetail()
-                await viewModel.loadPlayUrl()
+                await viewModel.loadPlayUrl(forceReload: true)
               }
             }
           }
@@ -111,7 +111,7 @@ struct VideoDetailView: View {
     .secondaryPageTabBarHidden()
     .refreshable {
       await viewModel.loadVideoDetail()
-      await viewModel.loadPlayUrl()
+      await viewModel.loadPlayUrl(forceReload: true)
     }
     .alert("投币", isPresented: $showCoinAlert) {
       Button("取消", role: .cancel) {}

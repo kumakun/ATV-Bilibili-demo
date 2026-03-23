@@ -9,6 +9,7 @@ import SwiftUI
 
 @main
 struct BilibiliLive_iOSApp: App {
+  @UIApplicationDelegateAdaptor(BilibiliLiveIOSAppDelegate.self) private var appDelegate
   @State private var accountManager = AccountManagerIOS.shared
 
   var body: some Scene {

@@ -8,16 +8,32 @@
 import AVKit
 import SwiftUI
 
+@MainActor
+final class VideoPlayerFullscreenTransitionHandler {
+  private let orientationController: VideoPlayerOrientationControlling
+
+  init(orientationController: VideoPlayerOrientationControlling) {
+    self.orientationController = orientationController
+  }
+
+  func playerWillBeginFullscreen() {
+    orientationController.setFullscreen(true)
+  }
+
+  func playerWillEndFullscreen() {
+    orientationController.setFullscreen(false)
+  }
+}
+
 struct VideoPlayerView: View {
   let player: AVPlayer?
 
   var body: some View {
     if let player = player {
-      VideoPlayer(player: player)
+      PlayerViewController(player: player, showsPlaybackControls: true)
         .aspectRatio(16 / 9, contentMode: .fit)
         .background(Color.black)
     } else {
-      // 占位符
       Rectangle()
         .fill(Color.black)
         .aspectRatio(16 / 9, contentMode: .fit)
@@ -25,6 +41,56 @@ struct VideoPlayerView: View {
           ProgressView()
             .tint(.white)
         )
+    }
+  }
+}
+
+private struct PlayerViewController: UIViewControllerRepresentable {
+  let player: AVPlayer
+  let showsPlaybackControls: Bool
+
+  func makeCoordinator() -> Coordinator {
+    Coordinator()
+  }
+
+  func makeUIViewController(context: Context) -> AVPlayerViewController {
+    let controller = AVPlayerViewController()
+    controller.player = player
+    controller.showsPlaybackControls = showsPlaybackControls
+    controller.videoGravity = .resizeAspect
+    controller.allowsPictureInPicturePlayback = true
+    controller.canStartPictureInPictureAutomaticallyFromInline = true
+    controller.delegate = context.coordinator
+    return controller
+  }
+
+  func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
+    if uiViewController.player !== player {
+      uiViewController.player = player
+    }
+
+    uiViewController.showsPlaybackControls = showsPlaybackControls
+    uiViewController.delegate = context.coordinator
+  }
+
+  @MainActor
+  final class Coordinator: NSObject, AVPlayerViewControllerDelegate {
+    private let transitionHandler = VideoPlayerFullscreenTransitionHandler(
+      orientationController: VideoPlayerOrientationController.shared
+    )
+
+    func playerViewController(
+      _ playerViewController: AVPlayerViewController,
+      willBeginFullScreenPresentationWithAnimationCoordinator coordinator: any UIViewControllerTransitionCoordinator
+    ) {
+      transitionHandler.playerWillBeginFullscreen()
+    }
+
+    func playerViewController(
+      _ playerViewController: AVPlayerViewController,
+      willEndFullScreenPresentationWithAnimationCoordinator coordinator: any UIViewControllerTransitionCoordinator
+    ) {
+      transitionHandler.playerWillEndFullscreen()
     }
   }
 }
