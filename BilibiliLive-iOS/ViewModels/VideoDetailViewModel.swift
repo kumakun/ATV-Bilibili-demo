@@ -48,10 +48,7 @@ struct VideoPlayerBuilding {
 
   static let live = VideoPlayerBuilding(
     makeDashPlayer: { playURLInfo, aid in
-      guard let (videoURL, audioURL) = DASHVideoPlayer.extractBestStreams(from: playURLInfo) else {
-        return nil
-      }
-      return await DASHVideoPlayer.createPlayer(videoURL: videoURL, audioURL: audioURL, aid: aid)
+      await DASHVideoPlayer.createPlayer(from: playURLInfo, aid: aid)
     },
     makeDirectPlayer: { url, aid in
       DASHVideoPlayer.createDirectPlayer(url: url, aid: aid)

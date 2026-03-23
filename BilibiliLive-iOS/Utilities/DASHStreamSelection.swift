@@ -5,12 +5,56 @@ enum DASHStreamSelection {
     let id: Int
     let primaryURL: URL
     let allURLs: [URL]
+    let bandwidth: Int
+    let codecs: String?
+    let width: Int?
+    let height: Int?
+    let frameRate: String?
+    let segmentBase: VideoPlayURLInfo.Dash.SegmentBase?
+
+    init(
+      id: Int,
+      primaryURL: URL,
+      allURLs: [URL],
+      bandwidth: Int = 1,
+      codecs: String? = nil,
+      width: Int? = nil,
+      height: Int? = nil,
+      frameRate: String? = nil,
+      segmentBase: VideoPlayURLInfo.Dash.SegmentBase? = nil
+    ) {
+      self.id = id
+      self.primaryURL = primaryURL
+      self.allURLs = allURLs
+      self.bandwidth = bandwidth
+      self.codecs = codecs
+      self.width = width
+      self.height = height
+      self.frameRate = frameRate
+      self.segmentBase = segmentBase
+    }
   }
 
   struct SelectedAudio {
     let id: Int
     let primaryURL: URL
     let allURLs: [URL]
+    let bandwidth: Int
+    let segmentBase: VideoPlayURLInfo.Dash.SegmentBase?
+
+    init(
+      id: Int,
+      primaryURL: URL,
+      allURLs: [URL],
+      bandwidth: Int = 1,
+      segmentBase: VideoPlayURLInfo.Dash.SegmentBase? = nil
+    ) {
+      self.id = id
+      self.primaryURL = primaryURL
+      self.allURLs = allURLs
+      self.bandwidth = bandwidth
+      self.segmentBase = segmentBase
+    }
   }
 
   struct Selection {
@@ -85,7 +129,17 @@ enum DASHStreamSelection {
       throw SelectionError.invalidURL(stream.baseUrl)
     }
     let allURLs = try makeURLs(from: stream.allUrls)
-    return SelectedVideo(id: stream.id, primaryURL: primaryURL, allURLs: allURLs)
+    return SelectedVideo(
+      id: stream.id,
+      primaryURL: primaryURL,
+      allURLs: allURLs,
+      bandwidth: stream.bandwidth,
+      codecs: stream.codecs,
+      width: stream.width,
+      height: stream.height,
+      frameRate: stream.frameRate,
+      segmentBase: stream.segmentBase
+    )
   }
 
   private static func makeSelectedAudio(from stream: VideoPlayURLInfo.Dash.AudioStream) throws
@@ -95,7 +149,13 @@ enum DASHStreamSelection {
       throw SelectionError.invalidURL(stream.baseUrl)
     }
     let allURLs = try makeURLs(from: stream.allUrls)
-    return SelectedAudio(id: stream.id, primaryURL: primaryURL, allURLs: allURLs)
+    return SelectedAudio(
+      id: stream.id,
+      primaryURL: primaryURL,
+      allURLs: allURLs,
+      bandwidth: stream.bandwidth,
+      segmentBase: stream.segmentBase
+    )
   }
 
   private static func makeURLs(from strings: [String]) throws -> [URL] {

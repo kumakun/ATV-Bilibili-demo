@@ -7,9 +7,11 @@
 
 import AVFoundation
 import Foundation
+import ObjectiveC
 
 /// DASH视频播放器管理器，用于处理B站的DASH格式视频（音视频分离）
 class DASHVideoPlayer {
+  private static var resourceLoaderAssociationKey: UInt8 = 0
 
   private static func assetOptions(for aid: Int) -> [String: Any] {
     let headers = [
@@ -30,6 +32,32 @@ class DASHVideoPlayer {
     let asset = AVURLAsset(url: url, options: assetOptions(for: aid))
     let playerItem = AVPlayerItem(asset: asset)
     return AVPlayer(playerItem: playerItem)
+  }
+
+  static func createPlayer(from playURLInfo: VideoPlayURLInfo, aid: Int) async -> AVPlayer? {
+    do {
+      let selection = try DASHStreamSelection.select(from: playURLInfo)
+      let resourceLoader = DASHResourceLoader(
+        video: selection.video,
+        audio: selection.audio,
+        aid: aid
+      )
+
+      let asset = AVURLAsset(url: resourceLoader.playbackURL, options: assetOptions(for: aid))
+      asset.resourceLoader.setDelegate(resourceLoader, queue: DispatchQueue(label: "bilibili.dash.loader"))
+      let playerItem = AVPlayerItem(asset: asset)
+      objc_setAssociatedObject(
+        playerItem,
+        &resourceLoaderAssociationKey,
+        resourceLoader,
+        .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+      )
+
+      return AVPlayer(playerItem: playerItem)
+    } catch {
+      print("❌ DASHVideoPlayer: Failed to create resource-loader player: \(error)")
+      return nil
+    }
   }
 
   /// 创建支持DASH格式的AVPlayer
@@ -133,85 +161,13 @@ class DASHVideoPlayer {
   static func extractBestStreams(from playURLInfo: VideoPlayURLInfo) -> (
     videoURL: URL, audioURL: URL
   )? {
-    guard let dash = playURLInfo.dash else {
-      print("❌ DASHVideoPlayer: No DASH info found")
+    do {
+      let selection = try DASHStreamSelection.select(from: playURLInfo)
+      return (selection.video.primaryURL, selection.audio.primaryURL)
+    } catch {
+      print("❌ DASHVideoPlayer: Failed to extract best streams: \(error)")
       return nil
     }
-
-    // 获取视频流（优先选择AVC/H.264，避免HEVC兼容性问题）
-    var videoStreams = dash.video
-
-    print("🎬 DASHVideoPlayer: Available video streams:")
-    for stream in videoStreams.prefix(3) {
-      let codecsStr = stream.codecs ?? "unknown"
-      print(
-        "   ID: \(stream.id), codecid: \(stream.codecid), codecs: \(codecsStr), bandwidth: \(stream.bandwidth)"
-      )
-    }
-
-    // 优先选择AVC编码（H.264）以获得最佳兼容性
-    // 按画质分组，每个画质优先选择AVC
-    let qualityGroups = Dictionary(grouping: videoStreams, by: { $0.id })
-    var selectedStreams: [VideoPlayURLInfo.Dash.VideoStream] = []
-
-    for (_, streams) in qualityGroups {
-      // 先找AVC编码
-      if let avcStream = streams.first(where: { !$0.isHevc }) {
-        selectedStreams.append(avcStream)
-      } else if let hevcStream = streams.first {
-        // 没有AVC才用HEVC
-        selectedStreams.append(hevcStream)
-      }
-    }
-
-    // 按画质排序，选择最高画质
-    videoStreams = selectedStreams.sorted { $0.id > $1.id }
-
-    guard let videoStream = videoStreams.first,
-      let videoURL = URL(string: videoStream.baseUrl)
-    else {
-      print("❌ DASHVideoPlayer: No video stream found")
-      return nil
-    }
-
-    // 尝试获取音频流
-    guard let audioStreams = dash.audio, !audioStreams.isEmpty else {
-      print("❌ DASHVideoPlayer: No audio stream found")
-      return nil
-    }
-
-    print("🎵 DASHVideoPlayer: Available audio streams:")
-    for stream in audioStreams {
-      print("   ID: \(stream.id), bandwidth: \(stream.bandwidth)")
-    }
-
-    // iOS原生支持的音频格式优先级：
-    // 30216: AAC-LC 64kbps (最佳兼容性)
-    // 30232: AAC-LC 132kbps
-    // 30280: AAC-HE (部分设备可能不支持)
-
-    // 优先选择30216或30232 (标准AAC格式)
-    let preferredIds = [30216, 30232, 30251]
-    let selectedStream =
-      preferredIds.compactMap { preferredId in
-        audioStreams.first { $0.id == preferredId }
-      }.first ?? audioStreams.sorted { $0.id < $1.id }.first
-
-    guard let audioStream = selectedStream,
-      let audioURL = URL(string: audioStream.baseUrl)
-    else {
-      print("❌ DASHVideoPlayer: Failed to create audio URL")
-      return nil
-    }
-
-    print("✅ DASHVideoPlayer: Extracted streams")
-    let codecsStr = videoStream.codecs ?? "unknown"
-    print(
-      "   Video quality: \(videoStream.id), codecid: \(videoStream.codecid), codecs: \(codecsStr) \(videoStream.isHevc ? "(HEVC)" : "(AVC)")"
-    )
-    print("   Audio id: \(audioStream.id) (from \(audioStreams.count) streams)")
-
-    return (videoURL, audioURL)
   }
 
   /// 尝试使用备用音频流

@@ -47,4 +47,11 @@ struct DASHResourceLoaderTests {
     #expect(playlist.contains("#EXTINF:1,"))
     #expect(playlist.contains("https://audio/aac.m4s"))
   }
+
+  @Test
+  func producesCustomSchemePlaybackURL() {
+    let loader = makeLoader()
+
+    #expect(loader.playbackURL.absoluteString.hasPrefix("bilibili-dash://"))
+  }
 }

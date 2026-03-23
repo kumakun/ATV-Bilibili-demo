@@ -210,6 +210,16 @@ struct VideoPlayURLInfo: Codable, Hashable {
     let video: [VideoStream]
     let audio: [AudioStream]?
 
+    struct SegmentBase: Codable, Hashable {
+      let initialization: String
+      let indexRange: String
+
+      enum CodingKeys: String, CodingKey {
+        case initialization
+        case indexRange = "index_range"
+      }
+    }
+
     struct VideoStream: Codable, Hashable {
       let id: Int
       let baseUrl: String
@@ -217,6 +227,23 @@ struct VideoPlayURLInfo: Codable, Hashable {
       let bandwidth: Int
       let codecid: Int
       let codecs: String?
+      let width: Int? = nil
+      let height: Int? = nil
+      let frameRate: String? = nil
+      let segmentBase: SegmentBase? = nil
+
+      enum CodingKeys: String, CodingKey {
+        case id
+        case baseUrl
+        case backupUrl = "backup_url"
+        case bandwidth
+        case codecid
+        case codecs
+        case width
+        case height
+        case frameRate = "frame_rate"
+        case segmentBase = "segment_base"
+      }
 
       // 检查是否为HEVC编码
       var isHevc: Bool {
@@ -244,6 +271,15 @@ struct VideoPlayURLInfo: Codable, Hashable {
       let baseUrl: String
       let backupUrl: [String]?
       let bandwidth: Int
+      let segmentBase: SegmentBase? = nil
+
+      enum CodingKeys: String, CodingKey {
+        case id
+        case baseUrl
+        case backupUrl = "backup_url"
+        case bandwidth
+        case segmentBase = "segment_base"
+      }
 
       // 获取所有可用URL（主URL + 备用URL）
       var allUrls: [String] {
