@@ -95,13 +95,13 @@ final class VideoDetailViewModel {
   init(
     aid: Int,
     cid: Int = 0,
-    playURLLoader: VideoPlayURLLoading = .live,
-    playerBuilder: VideoPlayerBuilding = .live
+    playURLLoader: VideoPlayURLLoading? = nil,
+    playerBuilder: VideoPlayerBuilding? = nil
   ) {
     self.aid = aid
     self.cid = cid
-    self.playURLLoader = playURLLoader
-    self.playerBuilder = playerBuilder
+    self.playURLLoader = playURLLoader ?? .live
+    self.playerBuilder = playerBuilder ?? .live
   }
 
   // MARK: - Load Video Detail
