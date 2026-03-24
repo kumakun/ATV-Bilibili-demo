@@ -4,6 +4,23 @@ import Foundation
 import UniformTypeIdentifiers
 
 final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
+  struct SidxDownloadResult {
+    let timescale: Int
+    let segments: [Segment]
+
+    struct Segment {
+      let size: Int
+      let duration: Int
+    }
+
+    func maxSegmentDuration() -> Int? {
+      guard let duration = segments.map({ Double($0.duration) / Double(timescale) }).max() else {
+        return nil
+      }
+      return Int(duration + 1)
+    }
+  }
+
   enum URLs {
     static let customScheme = "bilibili-dash"
     static let master = "\(customScheme)://stream/master"
@@ -20,11 +37,28 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
   let audio: DASHStreamSelection.SelectedAudio
   let aid: Int
   let playbackURL = URL(string: URLs.master)!
+  private let sidxDownloader: @Sendable (URL, String) async -> SidxDownloadResult?
+  private var currentVideoURLIndex = 0
+  private var currentAudioURLIndex = 0
 
-  init(video: DASHStreamSelection.SelectedVideo, audio: DASHStreamSelection.SelectedAudio, aid: Int) {
+  var currentVideoURL: URL {
+    video.allURLs[min(currentVideoURLIndex, video.allURLs.count - 1)]
+  }
+
+  var currentAudioURL: URL {
+    audio.allURLs[min(currentAudioURLIndex, audio.allURLs.count - 1)]
+  }
+
+  init(
+    video: DASHStreamSelection.SelectedVideo,
+    audio: DASHStreamSelection.SelectedAudio,
+    aid: Int,
+    sidxDownloader: (@Sendable (URL, String) async -> SidxDownloadResult?)? = nil
+  ) {
     self.video = video
     self.audio = audio
     self.aid = aid
+    self.sidxDownloader = sidxDownloader ?? Self.downloadSidx
   }
 
   func masterPlaylist() -> String {
@@ -39,11 +73,11 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
   }
 
   func videoPlaylist() -> String {
-    simplePlaylist(url: video.primaryURL)
+    simplePlaylist(url: currentVideoURL)
   }
 
   func audioPlaylist() -> String {
-    simplePlaylist(url: audio.primaryURL)
+    simplePlaylist(url: currentAudioURL)
   }
 
   func resourceLoader(
@@ -139,24 +173,30 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
     loadingRequest.finishLoading()
   }
 
-  private func detailedPlaylist(for stream: DASHStreamSelection.SelectedVideo) async -> String? {
+  func detailedPlaylist(for stream: DASHStreamSelection.SelectedVideo) async -> String? {
     await detailedPlaylist(
-      url: stream.primaryURL,
+      urls: stream.allURLs,
+      currentURL: { self.currentVideoURL },
+      advanceURL: { self.advanceVideoURLAfterFailure() },
       duration: 0,
       segmentBase: stream.segmentBase
     )
   }
 
-  private func detailedPlaylist(for stream: DASHStreamSelection.SelectedAudio) async -> String? {
+  func detailedPlaylist(for stream: DASHStreamSelection.SelectedAudio) async -> String? {
     await detailedPlaylist(
-      url: stream.primaryURL,
+      urls: stream.allURLs,
+      currentURL: { self.currentAudioURL },
+      advanceURL: { self.advanceAudioURLAfterFailure() },
       duration: 0,
       segmentBase: stream.segmentBase
     )
   }
 
   private func detailedPlaylist(
-    url: URL,
+    urls: [URL],
+    currentURL: () -> URL,
+    advanceURL: () -> Bool,
     duration: Int,
     segmentBase: VideoPlayURLInfo.Dash.SegmentBase?
   ) async -> String? {
@@ -171,7 +211,21 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
       return nil
     }
 
-    guard let sidx = await downloadSidx(from: url, indexRange: segmentBase.indexRange) else {
+    guard !urls.isEmpty else {
+      return nil
+    }
+
+    var activeURL = currentURL()
+    var resolvedSidx: SidxDownloadResult?
+    resolvedSidx = await downloadSidx(from: activeURL, indexRange: segmentBase.indexRange)
+    while resolvedSidx == nil {
+      guard advanceURL() else {
+        return nil
+      }
+      activeURL = currentURL()
+      resolvedSidx = await downloadSidx(from: activeURL, indexRange: segmentBase.indexRange)
+    }
+    guard let resolvedSidx else {
       return nil
     }
 
@@ -182,21 +236,21 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
     var playlist = """
     #EXTM3U
     #EXT-X-VERSION:7
-    #EXT-X-TARGETDURATION:\(max(sidx.maxSegmentDuration() ?? duration, Constants.fallbackTargetDuration))
+    #EXT-X-TARGETDURATION:\(max(resolvedSidx.maxSegmentDuration() ?? duration, Constants.fallbackTargetDuration))
     #EXT-X-MEDIA-SEQUENCE:1
     #EXT-X-INDEPENDENT-SEGMENTS
     #EXT-X-PLAYLIST-TYPE:VOD
-    #EXT-X-MAP:URI="\(url.absoluteString)",BYTERANGE="\(mapLength)@\(mapOffset)"
+    #EXT-X-MAP:URI="\(activeURL.absoluteString)",BYTERANGE="\(mapLength)@\(mapOffset)"
 
     """
 
-    for segment in sidx.segments {
-      let segmentDuration = Double(segment.duration) / Double(sidx.timescale)
+    for segment in resolvedSidx.segments {
+      let segmentDuration = Double(segment.duration) / Double(resolvedSidx.timescale)
       playlist.append(
         """
         #EXTINF:\(segmentDuration),
         #EXT-X-BYTERANGE:\(segment.size)@\(offset)
-        \(url.absoluteString)
+        \(activeURL.absoluteString)
 
         """
       )
@@ -207,21 +261,26 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
     return playlist
   }
 
-  private func downloadSidx(from url: URL, indexRange: String) async -> Sidx? {
-    let response = await AF.request(
-      url,
-      headers: [
-        "Range": "bytes=\(indexRange)",
-        "Referer": referer,
-        "User-Agent": userAgent,
-      ]
-    ).serializingData().result
+  @discardableResult
+  func advanceVideoURLAfterFailure() -> Bool {
+    advanceURLIndex(&currentVideoURLIndex, in: video.allURLs)
+  }
 
-    guard case let .success(data) = response else {
-      return nil
+  @discardableResult
+  func advanceAudioURLAfterFailure() -> Bool {
+    advanceURLIndex(&currentAudioURLIndex, in: audio.allURLs)
+  }
+
+  private func advanceURLIndex(_ index: inout Int, in urls: [URL]) -> Bool {
+    guard index + 1 < urls.count else {
+      return false
     }
+    index += 1
+    return true
+  }
 
-    return SidxParseUtility.processIndexData(data: data)
+  private func downloadSidx(from url: URL, indexRange: String) async -> SidxDownloadResult? {
+    await sidxDownloader(url, indexRange)
   }
 
   private func parseRange(_ value: String) -> ClosedRange<Int>? {
@@ -245,27 +304,28 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
   private var userAgent: String {
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15"
   }
-}
 
-private struct Sidx {
-  let timescale: Int
-  let segments: [Segment]
+  private static func downloadSidx(from url: URL, indexRange: String) async -> SidxDownloadResult? {
+    let response = await AF.request(
+      url,
+      headers: [
+        "Range": "bytes=\(indexRange)",
+        "Referer": "https://www.bilibili.com/",
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
+      ]
+    ).serializingData().result
 
-  struct Segment {
-    let size: Int
-    let duration: Int
-  }
-
-  func maxSegmentDuration() -> Int? {
-    guard let duration = segments.map({ Double($0.duration) / Double(timescale) }).max() else {
+    guard case let .success(data) = response else {
       return nil
     }
-    return Int(duration + 1)
+
+    return SidxParseUtility.processIndexData(data: data)
   }
 }
 
 private enum SidxParseUtility {
-  static func processIndexData(data: Data) -> Sidx? {
+  static func processIndexData(data: Data) -> DASHResourceLoader.SidxDownloadResult? {
     var offset: UInt64 = 0
 
     while offset < data.count - 8 {
@@ -293,7 +353,7 @@ private enum SidxParseUtility {
     return nil
   }
 
-  private static func processSIDX(data: Data) -> Sidx? {
+  private static func processSIDX(data: Data) -> DASHResourceLoader.SidxDownloadResult? {
     var offset: UInt64 = 0
     let version = data.getUInt8(offset: &offset)
     _ = data.getUInt8(offset: &offset)
@@ -313,16 +373,16 @@ private enum SidxParseUtility {
     _ = data.getValue(type: UInt16.self, offset: &offset).bigEndian
     let referenceCount = Int(data.getValue(type: UInt16.self, offset: &offset).bigEndian)
 
-    var segments = [Sidx.Segment]()
+    var segments = [DASHResourceLoader.SidxDownloadResult.Segment]()
     for _ in 0..<referenceCount {
       let sizeCode = data.getUInt32(offset: &offset)
       let referencedSize = Int(sizeCode & 0x7fff_ffff)
       let duration = Int(data.getUInt32(offset: &offset))
       _ = data.getUInt32(offset: &offset)
-      segments.append(Sidx.Segment(size: referencedSize, duration: duration))
+      segments.append(.init(size: referencedSize, duration: duration))
     }
 
-    return Sidx(timescale: timescale, segments: segments)
+    return DASHResourceLoader.SidxDownloadResult(timescale: timescale, segments: segments)
   }
 }
 
