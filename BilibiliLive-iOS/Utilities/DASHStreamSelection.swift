@@ -72,11 +72,17 @@ enum DASHStreamSelection {
   private static let preferredAudioIDs = [30216, 30232, 30251]
 
   static func select(from playInfo: VideoPlayURLInfo) throws -> Selection {
+    try select(from: playInfo, tier: .high)
+  }
+
+  static func select(from playInfo: VideoPlayURLInfo, tier: VideoPlaybackQualityTier) throws
+    -> Selection
+  {
     guard let dash = playInfo.dash else {
       throw SelectionError.missingDash
     }
 
-    let videoStream = try selectVideoStream(from: dash.video)
+    let videoStream = try selectVideoStream(from: dash.video, tier: tier)
     let audioStream = try selectAudioStream(from: dash.audio)
 
     return Selection(
@@ -85,15 +91,19 @@ enum DASHStreamSelection {
     )
   }
 
-  private static func selectVideoStream(from streams: [VideoPlayURLInfo.Dash.VideoStream]) throws
+  private static func selectVideoStream(
+    from streams: [VideoPlayURLInfo.Dash.VideoStream],
+    tier: VideoPlaybackQualityTier
+  ) throws
     -> VideoPlayURLInfo.Dash.VideoStream
   {
     guard !streams.isEmpty else {
       throw SelectionError.missingVideoStreams
     }
 
-    let highestQuality = streams.map(\.id).max() ?? streams[0].id
-    let qualityGroup = streams.filter { $0.id == highestQuality }
+    let options = VideoPlaybackQualityOption.makeOptions(from: streams)
+    let targetQualityID = options.first(where: { $0.tier == tier })?.qualityID ?? options[0].qualityID
+    let qualityGroup = streams.filter { $0.id == targetQualityID }
     if let avc = qualityGroup.first(where: isAvcStream) {
       return avc
     }
@@ -125,10 +135,10 @@ enum DASHStreamSelection {
   private static func makeSelectedVideo(from stream: VideoPlayURLInfo.Dash.VideoStream) throws
     -> SelectedVideo
   {
-    guard let primaryURL = URL(string: stream.baseUrl) else {
+    let allURLs = try makeURLs(from: orderedURLStrings(base: stream.baseUrl, backup: stream.backupUrl))
+    guard let primaryURL = allURLs.first else {
       throw SelectionError.invalidURL(stream.baseUrl)
     }
-    let allURLs = try makeURLs(from: stream.allUrls)
     return SelectedVideo(
       id: stream.id,
       primaryURL: primaryURL,
@@ -145,10 +155,10 @@ enum DASHStreamSelection {
   private static func makeSelectedAudio(from stream: VideoPlayURLInfo.Dash.AudioStream) throws
     -> SelectedAudio
   {
-    guard let primaryURL = URL(string: stream.baseUrl) else {
+    let allURLs = try makeURLs(from: orderedURLStrings(base: stream.baseUrl, backup: stream.backupUrl))
+    guard let primaryURL = allURLs.first else {
       throw SelectionError.invalidURL(stream.baseUrl)
     }
-    let allURLs = try makeURLs(from: stream.allUrls)
     return SelectedAudio(
       id: stream.id,
       primaryURL: primaryURL,
@@ -169,10 +179,36 @@ enum DASHStreamSelection {
     return urls
   }
 
+  private static func orderedURLStrings(base: String, backup: [String]?) -> [String] {
+    var candidates = [base]
+    if let backup {
+      candidates.append(contentsOf: backup)
+    }
+
+    let deduplicated = Array(NSOrderedSet(array: candidates)) as? [String] ?? candidates
+    return deduplicated.sorted { lhs, rhs in
+      let lhsIsPCDN = isPCDNURL(lhs)
+      let rhsIsPCDN = isPCDNURL(rhs)
+
+      switch (lhsIsPCDN, rhsIsPCDN) {
+      case (true, false):
+        return false
+      case (false, true):
+        return true
+      case (true, true), (false, false):
+        return lhs > rhs
+      }
+    }
+  }
+
   private static func isAvcStream(_ stream: VideoPlayURLInfo.Dash.VideoStream) -> Bool {
     if let codecs = stream.codecs {
       return codecs.starts(with: "avc")
     }
     return stream.codecid == 7
+  }
+
+  private static func isPCDNURL(_ url: String) -> Bool {
+    url.contains("szbdyd.com") || url.contains("mcdn.bilivideo.cn")
   }
 }
