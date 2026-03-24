@@ -62,7 +62,7 @@ struct VideoPlayerView: View {
   }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 12) {
+    VStack(alignment: .trailing, spacing: 12) {
       if let player = player {
         PlayerViewController(player: player, showsPlaybackControls: true)
           .aspectRatio(16 / 9, contentMode: .fit)
@@ -76,29 +76,30 @@ struct VideoPlayerView: View {
               .tint(.white)
           )
       }
-
-      if !availablePlaybackQualities.isEmpty {
-        if qualityMenuState.isEnabled {
-          Menu {
-            ForEach(availablePlaybackQualities) { quality in
-              Button {
-                onPlaybackQualitySelected(quality.tier)
-              } label: {
-                if selectedPlaybackQuality == quality.tier {
-                  Label(quality.tier.title, systemImage: "checkmark")
-                } else {
-                  Text(quality.tier.title)
+      HStack {
+        if !availablePlaybackQualities.isEmpty {
+          if qualityMenuState.isEnabled {
+            Menu {
+              ForEach(availablePlaybackQualities) { quality in
+                Button {
+                  onPlaybackQualitySelected(quality.tier)
+                } label: {
+                  if selectedPlaybackQuality == quality.tier {
+                    Label(quality.tier.title, systemImage: "checkmark")
+                  } else {
+                    Text(quality.tier.title)
+                  }
                 }
               }
+            } label: {
+              qualityMenuLabel(showsChevron: true)
             }
-          } label: {
-            qualityMenuLabel(showsChevron: true)
+            .buttonStyle(.plain)
+          } else {
+            qualityMenuLabel(showsChevron: false)
           }
-          .buttonStyle(.plain)
-        } else {
-          qualityMenuLabel(showsChevron: false)
         }
-      }
+      }.padding(.horizontal, 16)
     }
   }
 
