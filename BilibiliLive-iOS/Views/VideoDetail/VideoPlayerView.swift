@@ -8,6 +8,29 @@
 import AVKit
 import SwiftUI
 
+struct VideoPlayerQualityMenuState {
+  enum Style: Equatable {
+    case accented
+    case dimmed
+  }
+
+  let title: String
+  let isEnabled: Bool
+  let style: Style
+
+  init(
+    availablePlaybackQualities: [VideoPlaybackQualityOption],
+    selectedPlaybackQuality: VideoPlaybackQualityTier?
+  ) {
+    let currentTier = selectedPlaybackQuality
+      ?? availablePlaybackQualities.first?.tier
+      ?? .high
+    self.title = "画质·\(currentTier.title)"
+    self.isEnabled = availablePlaybackQualities.count > 1
+    self.style = isEnabled ? .accented : .dimmed
+  }
+}
+
 @MainActor
 final class VideoPlayerFullscreenTransitionHandler {
   private let orientationController: VideoPlayerOrientationControlling
@@ -31,6 +54,13 @@ struct VideoPlayerView: View {
   let selectedPlaybackQuality: VideoPlaybackQualityTier?
   let onPlaybackQualitySelected: (VideoPlaybackQualityTier) -> Void
 
+  private var qualityMenuState: VideoPlayerQualityMenuState {
+    VideoPlayerQualityMenuState(
+      availablePlaybackQualities: availablePlaybackQualities,
+      selectedPlaybackQuality: selectedPlaybackQuality
+    )
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
       if let player = player {
@@ -47,30 +77,66 @@ struct VideoPlayerView: View {
           )
       }
 
-      if availablePlaybackQualities.count > 1 {
-        ScrollView(.horizontal, showsIndicators: false) {
-          HStack(spacing: 10) {
+      if !availablePlaybackQualities.isEmpty {
+        if qualityMenuState.isEnabled {
+          Menu {
             ForEach(availablePlaybackQualities) { quality in
               Button {
                 onPlaybackQualitySelected(quality.tier)
               } label: {
-                Text(quality.tier.title)
-                  .font(.subheadline.weight(.semibold))
-                  .foregroundStyle(
-                    selectedPlaybackQuality == quality.tier ? Color.white : Color.primary
-                  )
-                  .padding(.horizontal, 14)
-                  .padding(.vertical, 8)
-                  .background(
-                    Capsule()
-                      .fill(selectedPlaybackQuality == quality.tier ? Color.accentColor : Color(.secondarySystemFill))
-                  )
+                if selectedPlaybackQuality == quality.tier {
+                  Label(quality.tier.title, systemImage: "checkmark")
+                } else {
+                  Text(quality.tier.title)
+                }
               }
-              .buttonStyle(.plain)
             }
+          } label: {
+            qualityMenuLabel(showsChevron: true)
           }
+          .buttonStyle(.plain)
+        } else {
+          qualityMenuLabel(showsChevron: false)
         }
       }
+    }
+  }
+
+  @ViewBuilder
+  private func qualityMenuLabel(showsChevron: Bool) -> some View {
+    HStack(spacing: 8) {
+      Text(qualityMenuState.title)
+        .font(.subheadline.weight(.semibold))
+
+      if showsChevron {
+        Image(systemName: "chevron.down")
+          .font(.caption.weight(.semibold))
+      }
+    }
+    .foregroundStyle(foregroundColor)
+    .padding(.horizontal, 14)
+    .padding(.vertical, 8)
+    .background(
+      Capsule()
+        .fill(backgroundColor)
+    )
+  }
+
+  private var foregroundColor: Color {
+    switch qualityMenuState.style {
+    case .accented:
+      return .white
+    case .dimmed:
+      return .secondary
+    }
+  }
+
+  private var backgroundColor: Color {
+    switch qualityMenuState.style {
+    case .accented:
+      return .accentColor
+    case .dimmed:
+      return Color(.secondarySystemFill)
     }
   }
 }
