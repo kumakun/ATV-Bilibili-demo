@@ -35,8 +35,16 @@ class DASHVideoPlayer {
   }
 
   static func createPlayer(from playURLInfo: VideoPlayURLInfo, aid: Int) async -> AVPlayer? {
+    await createPlayer(from: playURLInfo, aid: aid, tier: .high)
+  }
+
+  static func createPlayer(
+    from playURLInfo: VideoPlayURLInfo,
+    aid: Int,
+    tier: VideoPlaybackQualityTier
+  ) async -> AVPlayer? {
     do {
-      let selection = try DASHStreamSelection.select(from: playURLInfo)
+      let selection = try DASHStreamSelection.select(from: playURLInfo, tier: tier)
       let resourceLoader = DASHResourceLoader(
         video: selection.video,
         audio: selection.audio,
@@ -161,8 +169,15 @@ class DASHVideoPlayer {
   static func extractBestStreams(from playURLInfo: VideoPlayURLInfo) -> (
     videoURL: URL, audioURL: URL
   )? {
+    extractBestStreams(from: playURLInfo, tier: .high)
+  }
+
+  static func extractBestStreams(
+    from playURLInfo: VideoPlayURLInfo,
+    tier: VideoPlaybackQualityTier
+  ) -> (videoURL: URL, audioURL: URL)? {
     do {
-      let selection = try DASHStreamSelection.select(from: playURLInfo)
+      let selection = try DASHStreamSelection.select(from: playURLInfo, tier: tier)
       return (selection.video.primaryURL, selection.audio.primaryURL)
     } catch {
       print("❌ DASHVideoPlayer: Failed to extract best streams: \(error)")

@@ -43,12 +43,12 @@ struct VideoPlayURLLoading {
 }
 
 struct VideoPlayerBuilding {
-  var makeDashPlayer: (VideoPlayURLInfo, Int) async -> AVPlayer?
+  var makeDashPlayer: (VideoPlayURLInfo, Int, VideoPlaybackQualityTier) async -> AVPlayer?
   var makeDirectPlayer: (URL, Int) -> AVPlayer
 
   static let live = VideoPlayerBuilding(
-    makeDashPlayer: { playURLInfo, aid in
-      await DASHVideoPlayer.createPlayer(from: playURLInfo, aid: aid)
+    makeDashPlayer: { playURLInfo, aid, tier in
+      await DASHVideoPlayer.createPlayer(from: playURLInfo, aid: aid, tier: tier)
     },
     makeDirectPlayer: { url, aid in
       DASHVideoPlayer.createDirectPlayer(url: url, aid: aid)
@@ -68,6 +68,8 @@ final class VideoDetailViewModel {
   // 播放相关
   var playURL: URL?
   var player: AVPlayer?
+  var availablePlaybackQualities = [VideoPlaybackQualityOption]()
+  var selectedPlaybackQuality: VideoPlaybackQualityTier?
 
   // 互动状态
   var isLiked = false
@@ -86,6 +88,7 @@ final class VideoDetailViewModel {
   private let playerBuilder: VideoPlayerBuilding
   private var currentPlayerCID: Int?
   private var isLoadingPlayURL = false
+  private var currentPlayURLInfo: VideoPlayURLInfo?
 
   // MARK: - Initialization
 
@@ -166,12 +169,16 @@ final class VideoDetailViewModel {
 
     do {
       let playURLInfo = try await playURLLoader.requestPlayURL(aid, cid)
+      currentPlayURLInfo = playURLInfo
+      updatePlaybackQualities(from: playURLInfo)
       print("✅ VideoDetailViewModel: Got play URL info, quality=\(playURLInfo.quality)")
       print("   Video streams: \(playURLInfo.dash?.video.count ?? 0)")
       print("   Audio streams: \(playURLInfo.dash?.audio?.count ?? 0)")
 
-      if let dashPlayer = await playerBuilder.makeDashPlayer(playURLInfo, aid) {
-        playURL = playURLInfo.bestVideoURL
+      let targetTier = selectedPlaybackQuality ?? .high
+      if let dashPlayer = await playerBuilder.makeDashPlayer(playURLInfo, aid, targetTier) {
+        playURL = DASHVideoPlayer.extractBestStreams(from: playURLInfo, tier: targetTier)?.videoURL
+          ?? playURLInfo.bestVideoURL
         player = dashPlayer
         currentPlayerCID = cid
         print("✅ VideoDetailViewModel: DASH player created successfully")
@@ -209,6 +216,35 @@ final class VideoDetailViewModel {
     print("✅ VideoDetailViewModel: Direct fallback player created successfully")
     player?.play()
     print("✅ VideoDetailViewModel: Direct fallback Player.play() called")
+  }
+
+  func switchPlaybackQuality(to tier: VideoPlaybackQualityTier) async {
+    guard selectedPlaybackQuality != tier else { return }
+    guard availablePlaybackQualities.contains(where: { $0.tier == tier }) else { return }
+    guard let playURLInfo = currentPlayURLInfo else { return }
+
+    let currentTime = player?.currentTime().seconds ?? 0
+    let resumeTime = currentTime.isFinite && currentTime > 0 ? currentTime : nil
+
+    guard let dashPlayer = await playerBuilder.makeDashPlayer(playURLInfo, aid, tier) else {
+      return
+    }
+
+    selectedPlaybackQuality = tier
+    playURL = DASHVideoPlayer.extractBestStreams(from: playURLInfo, tier: tier)?.videoURL
+      ?? playURLInfo.bestVideoURL
+    player = dashPlayer
+    currentPlayerCID = cid
+
+    if let resumeTime {
+      await dashPlayer.seek(
+        to: CMTime(seconds: resumeTime, preferredTimescale: 600),
+        toleranceBefore: .zero,
+        toleranceAfter: .zero
+      )
+    }
+
+    dashPlayer.play()
   }
 
   // MARK: - Load Interaction Status
@@ -340,6 +376,9 @@ final class VideoDetailViewModel {
     player = nil
     playURL = nil
     currentPlayerCID = nil
+    currentPlayURLInfo = nil
+    availablePlaybackQualities = []
+    selectedPlaybackQuality = nil
 
     // 加载新的播放地址
     await loadPlayUrl()
@@ -401,5 +440,10 @@ final class VideoDetailViewModel {
 
   var canPlayPrevious: Bool {
     currentPageIndex > 0
+  }
+
+  private func updatePlaybackQualities(from playURLInfo: VideoPlayURLInfo) {
+    availablePlaybackQualities = VideoPlaybackQualityOption.makeOptions(from: playURLInfo.dash?.video ?? [])
+    selectedPlaybackQuality = availablePlaybackQualities.first?.tier
   }
 }
