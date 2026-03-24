@@ -25,7 +25,16 @@ struct VideoDetailView: View {
     ScrollView {
       VStack(spacing: 16) {
         // 视频播放器
-        VideoPlayerView(player: viewModel.player)
+        VideoPlayerView(
+          player: viewModel.player,
+          availablePlaybackQualities: viewModel.availablePlaybackQualities,
+          selectedPlaybackQuality: viewModel.selectedPlaybackQuality,
+          onPlaybackQualitySelected: { tier in
+            Task {
+              await viewModel.switchPlaybackQuality(to: tier)
+            }
+          }
+        )
 
         if viewModel.isLoading {
           ProgressView("加载中...")

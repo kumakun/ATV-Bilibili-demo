@@ -27,20 +27,50 @@ final class VideoPlayerFullscreenTransitionHandler {
 
 struct VideoPlayerView: View {
   let player: AVPlayer?
+  let availablePlaybackQualities: [VideoPlaybackQualityOption]
+  let selectedPlaybackQuality: VideoPlaybackQualityTier?
+  let onPlaybackQualitySelected: (VideoPlaybackQualityTier) -> Void
 
   var body: some View {
-    if let player = player {
-      PlayerViewController(player: player, showsPlaybackControls: true)
-        .aspectRatio(16 / 9, contentMode: .fit)
-        .background(Color.black)
-    } else {
-      Rectangle()
-        .fill(Color.black)
-        .aspectRatio(16 / 9, contentMode: .fit)
-        .overlay(
-          ProgressView()
-            .tint(.white)
-        )
+    VStack(alignment: .leading, spacing: 12) {
+      if let player = player {
+        PlayerViewController(player: player, showsPlaybackControls: true)
+          .aspectRatio(16 / 9, contentMode: .fit)
+          .background(Color.black)
+      } else {
+        Rectangle()
+          .fill(Color.black)
+          .aspectRatio(16 / 9, contentMode: .fit)
+          .overlay(
+            ProgressView()
+              .tint(.white)
+          )
+      }
+
+      if availablePlaybackQualities.count > 1 {
+        ScrollView(.horizontal, showsIndicators: false) {
+          HStack(spacing: 10) {
+            ForEach(availablePlaybackQualities) { quality in
+              Button {
+                onPlaybackQualitySelected(quality.tier)
+              } label: {
+                Text(quality.tier.title)
+                  .font(.subheadline.weight(.semibold))
+                  .foregroundStyle(
+                    selectedPlaybackQuality == quality.tier ? Color.white : Color.primary
+                  )
+                  .padding(.horizontal, 14)
+                  .padding(.vertical, 8)
+                  .background(
+                    Capsule()
+                      .fill(selectedPlaybackQuality == quality.tier ? Color.accentColor : Color(.secondarySystemFill))
+                  )
+              }
+              .buttonStyle(.plain)
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -96,5 +126,14 @@ private struct PlayerViewController: UIViewControllerRepresentable {
 }
 
 #Preview {
-  VideoPlayerView(player: nil)
+  VideoPlayerView(
+    player: nil,
+    availablePlaybackQualities: [
+      VideoPlaybackQualityOption(tier: .high, qualityID: 120),
+      VideoPlaybackQualityOption(tier: .medium, qualityID: 64),
+      VideoPlaybackQualityOption(tier: .low, qualityID: 32),
+    ],
+    selectedPlaybackQuality: .high,
+    onPlaybackQualitySelected: { _ in }
+  )
 }
