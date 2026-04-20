@@ -14,31 +14,32 @@ struct VideoCard: View {
     VStack(alignment: .leading, spacing: 8) {
       // 封面图
       ZStack(alignment: .bottomTrailing) {
-        AsyncImage(url: URL(string: video.cover)) { phase in
-          switch phase {
-          case .empty:
-            Rectangle()
-              .fill(Color.gray.opacity(0.2))
-              .overlay {
-                ProgressView()
-              }
-          case .success(let image):
-            image
-              .resizable()
-              .aspectRatio(contentMode: .fill)
-          case .failure:
-            Rectangle()
-              .fill(Color.gray.opacity(0.2))
-              .overlay {
-                Image(systemName: "photo")
-                  .foregroundStyle(.gray)
-              }
-          @unknown default:
-            EmptyView()
+        Color.clear.overlay {
+          AsyncImage(url: URL(string: video.cover)) { phase in
+            switch phase {
+            case .empty:
+              Rectangle()
+                .fill(Color.gray.opacity(0.2))
+                .overlay {
+                  ProgressView()
+                }
+            case .success(let image):
+              image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+            case .failure:
+              Rectangle()
+                .fill(Color.gray.opacity(0.2))
+                .overlay {
+                  Image(systemName: "photo")
+                    .foregroundStyle(.gray)
+                }
+            @unknown default:
+              EmptyView()
+            }
           }
         }
-        .frame(height: 120)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .clipped()
 
         // 时长标签
         Text(video.durationText)
@@ -50,6 +51,8 @@ struct VideoCard: View {
           .cornerRadius(4)
           .padding(6)
       }
+      .aspectRatio(16 / 9, contentMode: .fit)
+      .clipShape(RoundedRectangle(cornerRadius: 8))
 
       // 标题
       Text(video.title)

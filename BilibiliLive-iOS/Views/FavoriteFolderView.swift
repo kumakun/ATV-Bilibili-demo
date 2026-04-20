@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct FavoriteFolderView: View {
   let folder: FavListDataIOS
   @State private var viewModel: FavoriteFolderViewModel
+  private let gridSpacing: CGFloat = 12
+  private let horizontalPadding: CGFloat = 16
 
   init(folder: FavListDataIOS) {
     self.folder = folder
@@ -46,28 +49,31 @@ struct FavoriteFolderView: View {
         )
       } else {
         // 视频列表
-        ScrollView {
-          LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 160), spacing: 16)],
-            spacing: 16
-          ) {
-            videoList
-          }
-          .padding()
+        GeometryReader { geometry in
+          ScrollView {
+            LazyVGrid(
+              columns: gridColumns(for: geometry.size.width),
+              spacing: gridSpacing
+            ) {
+              videoList
+            }
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, 12)
 
-          // 底部状态
-          if viewModel.isLoadingMore {
-            ProgressView()
-              .padding()
-          } else if !viewModel.hasMore && !viewModel.videos.isEmpty {
-            Text("已加载全部")
-              .font(.caption)
-              .foregroundStyle(.secondary)
-              .padding()
+            // 底部状态
+            if viewModel.isLoadingMore {
+              ProgressView()
+                .padding()
+            } else if !viewModel.hasMore && !viewModel.videos.isEmpty {
+              Text("已加载全部")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding()
+            }
           }
-        }
-        .refreshable {
-          await viewModel.refresh()
+          .refreshable {
+            await viewModel.refresh()
+          }
         }
       }
     }
@@ -90,6 +96,25 @@ struct FavoriteFolderView: View {
         await viewModel.loadVideos()
       }
     }
+  }
+
+  // MARK: - Grid Layout
+
+  private func gridColumns(for width: CGFloat) -> [GridItem] {
+    let usableWidth = max(width - (horizontalPadding * 2), 0)
+    let isPhone = UIDevice.current.userInterfaceIdiom == .phone
+
+    let columnCount: Int
+    if isPhone {
+      columnCount = 2
+    } else {
+      let minimumCardWidth: CGFloat = 240
+      let adaptiveCount = Int((usableWidth + gridSpacing) / (minimumCardWidth + gridSpacing))
+      columnCount = max(2, adaptiveCount)
+    }
+
+    return Array(
+      repeating: GridItem(.flexible(), spacing: gridSpacing, alignment: .top), count: columnCount)
   }
 
   // MARK: - Video List Content
