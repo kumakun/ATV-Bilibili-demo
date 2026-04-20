@@ -22,7 +22,7 @@ class DASHVideoPlayer {
 
     return [
       "AVURLAssetHTTPHeaderFieldsKey": headers,
-      AVURLAssetPreferPreciseDurationAndTimingKey: false,
+      AVURLAssetPreferPreciseDurationAndTimingKey: true,
     ]
   }
 
@@ -45,14 +45,17 @@ class DASHVideoPlayer {
   ) async -> AVPlayer? {
     do {
       let selection = try DASHStreamSelection.select(from: playURLInfo, tier: tier)
+      let dashDuration = playURLInfo.dash?.duration ?? 0
       let resourceLoader = DASHResourceLoader(
         video: selection.video,
         audio: selection.audio,
-        aid: aid
+        aid: aid,
+        duration: dashDuration
       )
 
       let asset = AVURLAsset(url: resourceLoader.playbackURL, options: assetOptions(for: aid))
-      asset.resourceLoader.setDelegate(resourceLoader, queue: DispatchQueue(label: "bilibili.dash.loader"))
+      asset.resourceLoader.setDelegate(
+        resourceLoader, queue: DispatchQueue(label: "bilibili.dash.loader"))
       let playerItem = AVPlayerItem(asset: asset)
       objc_setAssociatedObject(
         playerItem,

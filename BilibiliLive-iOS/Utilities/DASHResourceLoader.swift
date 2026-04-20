@@ -1,5 +1,5 @@
-import Alamofire
 import AVFoundation
+import Alamofire
 import Foundation
 import UniformTypeIdentifiers
 
@@ -36,6 +36,7 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
   let video: DASHStreamSelection.SelectedVideo
   let audio: DASHStreamSelection.SelectedAudio
   let aid: Int
+  let duration: Int
   let playbackURL = URL(string: URLs.master)!
   private let sidxDownloader: @Sendable (URL, String) async -> SidxDownloadResult?
   private var currentVideoURLIndex = 0
@@ -53,11 +54,13 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
     video: DASHStreamSelection.SelectedVideo,
     audio: DASHStreamSelection.SelectedAudio,
     aid: Int,
+    duration: Int = 0,
     sidxDownloader: (@Sendable (URL, String) async -> SidxDownloadResult?)? = nil
   ) {
     self.video = video
     self.audio = audio
     self.aid = aid
+    self.duration = duration
     self.sidxDownloader = sidxDownloader ?? Self.downloadSidx
   }
 
@@ -143,16 +146,17 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
   }
 
   private func simplePlaylist(url: URL) -> String {
-    """
-    #EXTM3U
-    #EXT-X-VERSION:6
-    #EXT-X-TARGETDURATION:\(Constants.fallbackTargetDuration)
-    #EXT-X-MEDIA-SEQUENCE:1
-    #EXT-X-PLAYLIST-TYPE:VOD
-    #EXTINF:\(Constants.fallbackTargetDuration),
-    \(url.absoluteString)
-    #EXT-X-ENDLIST
-    """
+    let segmentDuration = max(duration, Constants.fallbackTargetDuration)
+    return """
+      #EXTM3U
+      #EXT-X-VERSION:6
+      #EXT-X-TARGETDURATION:\(segmentDuration)
+      #EXT-X-MEDIA-SEQUENCE:1
+      #EXT-X-PLAYLIST-TYPE:VOD
+      #EXTINF:\(segmentDuration),
+      \(url.absoluteString)
+      #EXT-X-ENDLIST
+      """
   }
 
   private func respond(_ loadingRequest: AVAssetResourceLoadingRequest, content: String) {
@@ -234,15 +238,15 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
     var offset = indexRange.upperBound + 1
 
     var playlist = """
-    #EXTM3U
-    #EXT-X-VERSION:7
-    #EXT-X-TARGETDURATION:\(max(resolvedSidx.maxSegmentDuration() ?? duration, Constants.fallbackTargetDuration))
-    #EXT-X-MEDIA-SEQUENCE:1
-    #EXT-X-INDEPENDENT-SEGMENTS
-    #EXT-X-PLAYLIST-TYPE:VOD
-    #EXT-X-MAP:URI="\(activeURL.absoluteString)",BYTERANGE="\(mapLength)@\(mapOffset)"
+      #EXTM3U
+      #EXT-X-VERSION:7
+      #EXT-X-TARGETDURATION:\(max(resolvedSidx.maxSegmentDuration() ?? duration, Constants.fallbackTargetDuration))
+      #EXT-X-MEDIA-SEQUENCE:1
+      #EXT-X-INDEPENDENT-SEGMENTS
+      #EXT-X-PLAYLIST-TYPE:VOD
+      #EXT-X-MAP:URI="\(activeURL.absoluteString)",BYTERANGE="\(mapLength)@\(mapOffset)"
 
-    """
+      """
 
     for segment in resolvedSidx.segments {
       let segmentDuration = Double(segment.duration) / Double(resolvedSidx.timescale)
@@ -280,7 +284,16 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
   }
 
   private func downloadSidx(from url: URL, indexRange: String) async -> SidxDownloadResult? {
-    await sidxDownloader(url, indexRange)
+    let maxAttempts = 3
+    for attempt in 1...maxAttempts {
+      if let result = await sidxDownloader(url, indexRange) {
+        return result
+      }
+      if attempt < maxAttempts {
+        try? await Task.sleep(nanoseconds: 500_000_000)  // 0.5s between retries
+      }
+    }
+    return nil
   }
 
   private func parseRange(_ value: String) -> ClosedRange<Int>? {
@@ -313,10 +326,11 @@ final class DASHResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
         "Referer": "https://www.bilibili.com/",
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
-      ]
+      ],
+      requestModifier: { $0.timeoutInterval = 10 }
     ).serializingData().result
 
-    guard case let .success(data) = response else {
+    guard case .success(let data) = response else {
       return nil
     }
 
@@ -386,16 +400,16 @@ private enum SidxParseUtility {
   }
 }
 
-private extension Data {
-  func getUInt32(offset: inout UInt64) -> UInt32 {
+extension Data {
+  fileprivate func getUInt32(offset: inout UInt64) -> UInt32 {
     getValue(type: UInt32.self, offset: &offset).bigEndian
   }
 
-  func getUInt8(offset: inout UInt64) -> UInt8 {
+  fileprivate func getUInt8(offset: inout UInt64) -> UInt8 {
     getValue(type: UInt8.self, offset: &offset).bigEndian
   }
 
-  func getValue<T>(type: T.Type, offset: inout UInt64) -> T {
+  fileprivate func getValue<T>(type: T.Type, offset: inout UInt64) -> T {
     let size = UInt64(MemoryLayout<T>.size)
     defer { offset += size }
     return Data(self[offset..<offset + size]).withUnsafeBytes { $0.load(as: T.self) }
@@ -406,8 +420,8 @@ private protocol UIntToUInt8sConvertible {
   var toUInt8s: [UInt8] { get }
 }
 
-private extension UIntToUInt8sConvertible {
-  func toUInt8Array<T>(endian: T, count: Int) -> [UInt8] {
+extension UIntToUInt8sConvertible {
+  fileprivate func toUInt8Array<T>(endian: T, count: Int) -> [UInt8] {
     var value = endian
     let pointer = withUnsafePointer(to: &value) {
       $0.withMemoryRebound(to: UInt8.self, capacity: count) {
