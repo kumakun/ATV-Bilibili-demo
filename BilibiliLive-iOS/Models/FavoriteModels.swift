@@ -54,12 +54,13 @@ struct FavDataIOS: Codable, Identifiable, Hashable {
   struct Upper: Codable, Hashable {
     let mid: Int
     let name: String
-    let face: String
+    var face: String?
   }
 
   struct CntInfo: Codable, Hashable {
     let play: Int
-    let collect: Int
+    let danmaku: Int?
+    let collect: Int?
   }
 
   struct OGV: Codable, Hashable {

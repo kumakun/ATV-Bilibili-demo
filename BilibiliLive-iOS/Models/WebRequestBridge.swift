@@ -346,7 +346,7 @@ enum WebRequest {
   }
 
   static func requestFavSeason(seasonId: String, page: Int) async throws -> [FavDataIOS] {
-    let url = "https://api.bilibili.com/x/v3/fav/resource/list"
+    let url = "https://api.bilibili.com/x/space/fav/season/list"
     let parameters: [String: Any] = [
       "season_id": seasonId, "ps": 20, "pn": page, "platform": "web",
     ]

@@ -96,7 +96,7 @@ struct VideoCard: View {
       intro: "视频简介",
       duration: 3665,
       upper: FavDataIOS.Upper(mid: 1001, name: "测试UP主", face: ""),
-      cntInfo: FavDataIOS.CntInfo(play: 123456, collect: 789),
+      cntInfo: FavDataIOS.CntInfo(play: 123456, danmaku: 99, collect: 789),
       ogv: nil
     )
   )
