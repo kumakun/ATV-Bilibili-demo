@@ -10,7 +10,6 @@ import SwiftUI
 struct FavoriteFolderView: View {
   let folder: FavListDataIOS
   @State private var viewModel: FavoriteFolderViewModel
-  @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
   init(folder: FavListDataIOS) {
     self.folder = folder
@@ -48,19 +47,13 @@ struct FavoriteFolderView: View {
       } else {
         // 视频列表
         ScrollView {
-          if horizontalSizeClass == .regular {
-            // iPad 或横屏：网格布局
-            LazyVGrid(columns: gridColumns, spacing: 16) {
-              videoList
-            }
-            .padding()
-          } else {
-            // iPhone 竖屏：列表布局
-            LazyVStack(spacing: 12) {
-              videoList
-            }
-            .padding()
+          LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 160), spacing: 16)],
+            spacing: 16
+          ) {
+            videoList
           }
+          .padding()
 
           // 底部状态
           if viewModel.isLoadingMore {
@@ -119,14 +112,6 @@ struct FavoriteFolderView: View {
     }
   }
 
-  // MARK: - Grid Configuration
-
-  private var gridColumns: [GridItem] {
-    [
-      GridItem(.flexible(), spacing: 16),
-      GridItem(.flexible(), spacing: 16),
-    ]
-  }
 }
 
 #Preview {
