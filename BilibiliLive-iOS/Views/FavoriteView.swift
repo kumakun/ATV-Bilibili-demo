@@ -49,7 +49,10 @@ struct FavoriteView: View {
         } else {
           // 正常列表展示
           ScrollView {
-            LazyVStack(spacing: 16) {
+            LazyVGrid(
+              columns: [GridItem(.adaptive(minimum: 160), spacing: 16)],
+              spacing: 16
+            ) {
               ForEach(viewModel.folders) { folder in
                 NavigationLink(value: folder) {
                   FavoriteFolderCard(folder: folder)

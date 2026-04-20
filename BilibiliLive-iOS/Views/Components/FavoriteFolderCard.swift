@@ -11,55 +11,49 @@ struct FavoriteFolderCard: View {
   let folder: FavListDataIOS
 
   var body: some View {
-    HStack(spacing: 12) {
-      // 文件夹图标
-      RoundedRectangle(cornerRadius: 8)
-        .fill(iconColor.opacity(0.2))
-        .frame(width: 60, height: 60)
-        .overlay {
-          Image(systemName: iconName)
-            .font(.title2)
-            .foregroundStyle(iconColor)
-        }
+    VStack(alignment: .leading, spacing: 8) {
+      // 顶部：小图标 + 订阅标签
+      HStack(spacing: 6) {
+        Image(systemName: iconName)
+          .font(.subheadline)
+          .foregroundStyle(iconColor)
+          .padding(6)
+          .background(iconColor.opacity(0.15))
+          .clipShape(RoundedRectangle(cornerRadius: 6))
 
-      // 信息
-      VStack(alignment: .leading, spacing: 4) {
-        HStack(spacing: 6) {
-          Text(folder.title)
-            .font(.subheadline)
-            .fontWeight(.medium)
-            .lineLimit(1)
+        Spacer()
 
-          // 订阅标签
-          if !folder.isCreatedBySelf {
-            Text("订阅")
-              .font(.caption2)
-              .padding(.horizontal, 6)
-              .padding(.vertical, 2)
-              .background(Color.orange.opacity(0.2))
-              .foregroundStyle(.orange)
-              .cornerRadius(4)
-          }
-        }
-
-        if let count = folder.mediaCount {
-          Text("\(count) 个内容")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        } else {
-          Text("收藏夹")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+        if !folder.isCreatedBySelf {
+          Text("订阅")
+            .font(.caption2)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Color.orange.opacity(0.15))
+            .foregroundStyle(.orange)
+            .cornerRadius(4)
         }
       }
 
-      Spacer()
+      // 标题
+      Text(folder.title)
+        .font(.subheadline)
+        .fontWeight(.medium)
+        .lineLimit(2)
+        .foregroundStyle(.primary)
 
-      Image(systemName: "chevron.right")
-        .foregroundStyle(.secondary)
-        .font(.caption)
+      // 内容数量
+      if let count = folder.mediaCount {
+        Text("\(count) 个内容")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      } else {
+        Text("收藏夹")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      }
     }
-    .padding()
+    .padding(12)
+    .frame(maxWidth: .infinity, alignment: .leading)
     .background(Color(.systemBackground))
     .cornerRadius(12)
     .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
