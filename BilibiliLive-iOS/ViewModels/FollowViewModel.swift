@@ -38,6 +38,7 @@ final class FollowViewModel {
       lastOffset = result.offset
       hasMore = result.hasMore
     } catch {
+      AppLog.error(error, context: "FollowViewModel.loadInitial")
       errorMessage = "加载失败：\(error.localizedDescription)"
     }
 
@@ -61,7 +62,8 @@ final class FollowViewModel {
       hasMore = result.hasMore
     } catch {
       page -= 1
-      errorMessage = "加载更多失败"
+      AppLog.error(error, context: "FollowViewModel.loadMore")
+      errorMessage = "加载更多失败：\(error.localizedDescription)"
     }
 
     isLoadingMore = false

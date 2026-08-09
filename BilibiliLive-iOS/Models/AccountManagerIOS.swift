@@ -47,6 +47,8 @@ final class AccountManagerIOS {
 
   private init() {
     loadFromStorage()
+    // 必须在依赖登录状态的视图出现前恢复 Cookie，避免首个请求以未登录状态发出。
+    bootstrap()
   }
 
   // MARK: - Bootstrap

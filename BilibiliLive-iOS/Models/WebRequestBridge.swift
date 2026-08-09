@@ -385,6 +385,12 @@ enum WebRequest {
 
   static func requestFollowsFeed(offset: String, page: Int) async throws -> DynamicFeedInfo {
     let url = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all"
+    let headers: HTTPHeaders = [
+      .userAgent(
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
+      ),
+      HTTPHeader(name: "Referer", value: "https://www.bilibili.com/"),
+    ]
     var parameters: [String: Any] = [
       "type": "all",
       "timezone_offset": "-480",
@@ -396,7 +402,7 @@ enum WebRequest {
     }
 
     return try await withCheckedThrowingContinuation { continuation in
-      AF.request(url, parameters: parameters).responseData { response in
+      AF.request(url, parameters: parameters, headers: headers).responseData { response in
         switch response.result {
         case .success(let data):
           let json = JSON(data)
@@ -414,6 +420,7 @@ enum WebRequest {
                       offset: feedInfo.offset, page: page)
                     continuation.resume(returning: nextFeed)
                   } catch {
+                    AppLog.error(error, context: "requestFollowsFeed.nextPage")
                     continuation.resume(throwing: error)
                   }
                 }
@@ -421,14 +428,19 @@ enum WebRequest {
                 continuation.resume(returning: feedInfo)
               }
             } catch {
+              AppLog.error(error, context: "requestFollowsFeed.decode")
               continuation.resume(
                 throwing: RequestError.decodeFail(message: error.localizedDescription))
             }
           } else {
+            AppLog.error(
+              "服务端返回 code=\(code), message=\(json["message"].stringValue)",
+              context: "requestFollowsFeed.status")
             continuation.resume(
               throwing: RequestError.statusFail(code: code, message: json["message"].stringValue))
           }
-        case .failure:
+        case .failure(let error):
+          AppLog.error(error, context: "requestFollowsFeed.network")
           continuation.resume(throwing: RequestError.networkFail)
         }
       }

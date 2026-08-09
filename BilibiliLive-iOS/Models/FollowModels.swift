@@ -24,8 +24,74 @@ struct DynamicFeedInfo: Codable {
     case hasMore = "has_more"
   }
 
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+
+    // 动态流包含多种业务卡片。单条未知或字段异常的卡片不应让整个更新页加载失败。
+    let decodedItems =
+      try container.decodeIfPresent([LossyDecodable<DynamicFeedData>].self, forKey: .items) ?? []
+    items = decodedItems.compactMap(\.value)
+
+    offset = container.flexibleString(forKey: .offset) ?? ""
+    updateNum = container.flexibleInt(forKey: .updateNum) ?? 0
+    updateBaseline = container.flexibleString(forKey: .updateBaseline) ?? ""
+    hasMore = container.flexibleBool(forKey: .hasMore) ?? false
+  }
+
   var videoFeeds: [DynamicFeedData] {
     return items.filter { $0.aid != 0 || $0.modules.moduleDynamic.major?.pgc != nil }
+  }
+}
+
+private struct LossyDecodable<Value: Decodable>: Decodable {
+  let value: Value?
+
+  init(from decoder: Decoder) throws {
+    do {
+      value = try Value(from: decoder)
+    } catch {
+      AppLog.error(error, context: "DynamicFeedInfo.items")
+      value = nil
+    }
+  }
+}
+
+private extension KeyedDecodingContainer {
+  func flexibleString(forKey key: Key) -> String? {
+    if let value = try? decodeIfPresent(String.self, forKey: key) {
+      return value
+    }
+    if let value = try? decodeIfPresent(Int.self, forKey: key) {
+      return String(value)
+    }
+    return nil
+  }
+
+  func flexibleInt(forKey key: Key) -> Int? {
+    if let value = try? decodeIfPresent(Int.self, forKey: key) {
+      return value
+    }
+    if let value = try? decodeIfPresent(String.self, forKey: key) {
+      return Int(value)
+    }
+    return nil
+  }
+
+  func flexibleBool(forKey key: Key) -> Bool? {
+    if let value = try? decodeIfPresent(Bool.self, forKey: key) {
+      return value
+    }
+    if let value = try? decodeIfPresent(Int.self, forKey: key) {
+      return value != 0
+    }
+    if let value = try? decodeIfPresent(String.self, forKey: key) {
+      switch value.lowercased() {
+      case "true", "1": return true
+      case "false", "0": return false
+      default: return nil
+      }
+    }
+    return nil
   }
 }
 

@@ -16,9 +16,6 @@ struct BilibiliLive_iOSApp: App {
     WindowGroup {
       ContentView()
         .environment(accountManager)
-        .onAppear {
-          accountManager.bootstrap()
-        }
     }
   }
 }
