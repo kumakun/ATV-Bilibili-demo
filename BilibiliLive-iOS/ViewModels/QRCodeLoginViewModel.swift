@@ -116,11 +116,11 @@ final class QRCodeLoginViewModel {
           self.stopPolling()
           self.handleLoginSuccess(token: token, cookies: cookies)
 
-        case .fail:
+        case .fail(let message):
           // Login failed
           self.stopPolling()
-          self.loginState = .failed("Login failed")
-          self.errorMessage = "登录失败，请重试"
+          self.loginState = .failed(message)
+          self.errorMessage = message
         }
       }
     }
@@ -131,6 +131,7 @@ final class QRCodeLoginViewModel {
   private func handleLoginSuccess(token: LoginToken, cookies: [HTTPCookie]) {
     loginState = .loading
 
+    CookieHandler.shared.replaceCookies(with: cookies.map(StoredCookie.init))
     AccountManagerIOS.shared.registerAccount(token: token, cookies: cookies) { [weak self] _ in
       guard let self else { return }
 

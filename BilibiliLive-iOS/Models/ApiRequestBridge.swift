@@ -21,7 +21,7 @@ enum ApiRequest {
 
   enum LoginState {
     case success(token: LoginToken, cookies: [HTTPCookie])
-    case fail
+    case fail(String)
     case expire
     case waiting
   }
@@ -114,43 +114,49 @@ enum ApiRequest {
   }
 
   static func verifyLoginQR(code: String, handler: ((LoginState) -> Void)? = nil) {
-    let decoder = JSONDecoder()
-    decoder.keyDecodingStrategy = .convertFromSnakeCase
-
     let parameters = sign(for: ["auth_code": code])
 
     AF.request(
       EndPoint.verifyQR, method: .post, parameters: parameters, encoding: URLEncoding.default
     )
+    .validate()
     .responseData { response in
       switch response.result {
-      case .success(var data):
-        let json = JSON(data)
-        let code = json["code"].intValue
-
-        if code == 0 {
-          do {
-            var resp = try decoder.decode(LoginResp.self, from: json["data"].rawData())
-            resp.tokenInfo.expireDate = Date().addingTimeInterval(
-              TimeInterval(resp.tokenInfo.expiresIn))
-            let cookies = resp.cookieInfo.toCookies()
-            CookieHandler.shared.replaceCookies(with: cookies.map(StoredCookie.init))
-            handler?(.success(token: resp.tokenInfo, cookies: cookies))
-          } catch {
-            print("Decode error: \(error)")
-            handler?(.fail)
-          }
-        } else {
-          switch code {
-          case 86038: handler?(.expire)
-          case 86039: handler?(.waiting)
-          default: handler?(.fail)
-          }
-        }
-      case .failure(let error):
-        print("Request error: \(error)")
-        handler?(.fail)
+      case .success(let data):
+        handler?(parseLoginQRResponse(data))
+      case .failure:
+        handler?(.fail("登录请求失败，请检查网络后重试"))
       }
+    }
+  }
+
+  /// 仅解析轮询结果；Cookie 由登录成功处理流程写入。
+  static func parseLoginQRResponse(_ data: Data) -> LoginState {
+    let json = JSON(data)
+    guard let code = json["code"].int else {
+      return .fail("登录响应格式异常，请重试")
+    }
+
+    switch code {
+    case 86039, 86090:
+      // 未扫码、已扫码但未确认都需要继续轮询。
+      return .waiting
+    case 86038:
+      return .expire
+    case 0:
+      let decoder = JSONDecoder()
+      decoder.keyDecodingStrategy = .convertFromSnakeCase
+      do {
+        var resp = try decoder.decode(LoginResp.self, from: json["data"].rawData())
+        resp.tokenInfo.expireDate = Date().addingTimeInterval(TimeInterval(resp.tokenInfo.expiresIn))
+        return .success(token: resp.tokenInfo, cookies: resp.cookieInfo.toCookies())
+      } catch {
+        return .fail("登录凭据解析失败，请重新扫码")
+      }
+    default:
+      let message = json["message"].stringValue
+      let detail = message.isEmpty || message == "0" ? "登录失败，请重试" : message
+      return .fail("\(detail)（错误码 \(code)）")
     }
   }
 
